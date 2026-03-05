@@ -1,3 +1,6 @@
 from django.contrib import admin
+from .models import Kategorija, Proizvod, Zalihe
 
-# Register your models here.
+admin.site.register(Kategorija)
+admin.site.register(Proizvod)
+admin.site.register(Zalihe)

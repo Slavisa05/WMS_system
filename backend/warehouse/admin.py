@@ -1,3 +1,6 @@
 from django.contrib import admin
+from .models import Skladiste, Sektor, Slot
 
-# Register your models here.
+admin.site.register(Skladiste)
+admin.site.register(Sektor)
+admin.site.register(Slot)

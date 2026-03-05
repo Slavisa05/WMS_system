@@ -19,7 +19,7 @@ class Zaposleni(BaseModel):
     prezime = models.CharField(max_length=25, null=False, blank=False)
     jmbg = models.CharField(max_length=13, null=False, blank=False, unique=True)
     broj_telefona = models.CharField(max_length=20, null=False, blank=False, unique=True)
-    datum_zaposlenja = models.DateField()
+    datum_zaposlenja = models.DateField(blank=False, null=False)
     ugovor_do = models.DateField(null=True, blank=True)
     pozicija = models.ForeignKey(Pozicija, on_delete=models.SET_NULL, null=True)
 

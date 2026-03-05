@@ -44,8 +44,8 @@ class Proizvod(BaseModel):
     
 
 class Zalihe(BaseModel):
-    kolicina = models.DecimalField(blank=False, null=False)
-    rezervisana_kolicina = models.DecimalField(blank=False, null=False)
+    kolicina = models.DecimalField(max_digits=5, decimal_places=2, blank=False, null=False)
+    rezervisana_kolicina = models.DecimalField(max_digits=5, decimal_places=2, blank=False, null=False)
     proizvod = models.ForeignKey(Proizvod, blank=False, null=False, on_delete=models.PROTECT)
     slot = models.ForeignKey(Slot, blank=False, null=False, on_delete=models.PROTECT)
 
