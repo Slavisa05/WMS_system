@@ -1,3 +1,7 @@
-from django.shortcuts import render
+from rest_framework import viewsets
+from .serializers import PoslovniPartnerSerializer
+from .models import PoslovniPartner
 
-# Create your views here.
+class PoslovniPartnerViewSet(viewsets.ModelViewSet):
+    queryset = PoslovniPartner.objects.all()
+    serializer_class = PoslovniPartnerSerializer

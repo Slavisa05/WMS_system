@@ -28,10 +28,10 @@ class Transport(BaseModel):
         ('NEUSPESNO', 'Neuspešno'),
     ]
 
-    vozac = models.ForeignKey(Zaposleni, blank=False, null=False, on_delete=models.PROTECT)
+    vozac = models.ForeignKey(Zaposleni, blank=True, null=True, on_delete=models.PROTECT)
     vozilo = models.ForeignKey(Vozilo, blank=False, null=False, on_delete=models.PROTECT)
-    datum_polaska = models.DateField(blank=False, null=False)
-    datum_zavrsetka = models.DateField(blank=True, null=True)
+    datum_polaska = models.DateTimeField(blank=False, null=False)
+    datum_zavrsetka = models.DateTimeField(blank=True, null=True)
     status = models.CharField(max_length=9, blank=False, null=False, choices=STATUS_CHOICES)
     napomena = models.TextField(blank=True, null=True)
 
@@ -51,8 +51,8 @@ class Transport(BaseModel):
             
         if self.status == 'ZAVRSENO' and not self.datum_zavrsetka:
             raise ValidationError('Završeni transport mora imati datum završetka')
-    
+
     def __str__(self):
-        return f'{self.vozac.ime} - {self.vozilo} - {self.status}'
+        return f'{self.id} - {self.vozac} - {self.vozilo} - {self.status}'
 
 
