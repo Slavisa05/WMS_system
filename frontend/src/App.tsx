@@ -1,9 +1,7 @@
-import View from './View'
-
 function App() {
   return (
     <>
-      <View />
+      <h1>Hello World</h1>
     </>
   )
 }

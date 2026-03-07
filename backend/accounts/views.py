@@ -1,5 +1,5 @@
 from rest_framework import viewsets
-from .serializers import PozicijaSerializer, ZaposleniReadSerializer
+from .serializers import PozicijaSerializer, ZaposleniReadSerializer, ZaposleniWriteSerializer
 from .models import Pozicija, Zaposleni
 
 
@@ -10,5 +10,9 @@ class PozicijaViewSet(viewsets.ModelViewSet):
 
 class ZaposleniViewSet(viewsets.ModelViewSet):
     queryset = Zaposleni.objects.select_related('pozicija', 'user')
-    serializer_class = ZaposleniReadSerializer
+
+    def get_serializer_class(self):
+        if self.action in ['list', 'retrieve']:
+            return ZaposleniReadSerializer
+        return ZaposleniWriteSerializer
     
