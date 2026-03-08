@@ -3,7 +3,7 @@ from django.core.exceptions import ValidationError
 from core.models import BaseModel
 from partners.models import PoslovniPartner
 from accounts.models import Zaposleni
-from warehouse.models import Skladiste
+from warehouse.models import Skladiste, Slot
 from transport.models import Transport
 from inventory.models import Proizvod
 
@@ -20,6 +20,13 @@ class Dokument(BaseModel):
         ('OTPIS', 'Otpisana roba')
     ]
 
+    STATUS_CHOICES = [
+        ('NACRT', 'Nacrt',),
+        ('NA_CEKANJU', 'Na čekanju'),
+        ('ODOBREN', 'Odobren'),
+        ('ODBIJEN', 'Odbijen'),
+    ]
+
     tip = models.CharField(max_length=16, blank=False, null=False, choices=TIP_CHOICES)
     datum_vreme = models.DateTimeField()
     poslovni_partner = models.ForeignKey(PoslovniPartner, blank=True, null=True, on_delete=models.PROTECT)
@@ -27,6 +34,7 @@ class Dokument(BaseModel):
     skladiste_ulaza = models.ForeignKey(Skladiste, blank=True, null=True, on_delete=models.PROTECT, related_name='dokumenti_ulaza')
     skladiste_izlaza = models.ForeignKey(Skladiste, blank=True, null=True, on_delete=models.PROTECT, related_name='dokumenti_izlaza')
     transport = models.ForeignKey(Transport, blank=True, null=True, on_delete=models.PROTECT)
+    status = models.CharField(max_length=15, blank=False, null=False, choices=STATUS_CHOICES, default='NACRT')
 
     class Meta:
         verbose_name_plural = "Dokumenti"
@@ -57,8 +65,10 @@ class Dokument(BaseModel):
 
 
 class StavkeDokumenta(BaseModel):
-    dokument = models.ForeignKey(Dokument, blank=False, null=False, on_delete=models.CASCADE)
+    dokument = models.ForeignKey(Dokument, blank=False, null=False, on_delete=models.CASCADE, related_name='stavke')
     proizvod = models.ForeignKey(Proizvod, blank=False, null=False, on_delete=models.PROTECT)
+    slot_ulaza = models.ForeignKey(Slot, blank=False, null=False, on_delete=models.PROTECT, related_name='stavke_ulaza')
+    slot_izlaza = models.ForeignKey(Slot, blank=False, null=False, on_delete=models.PROTECT, related_name='stavke_izlaza')
     kolicina = models.DecimalField(max_digits=10, decimal_places=2)
     cena = models.DecimalField(max_digits=10, decimal_places=2)
 

@@ -1,15 +1,30 @@
 from rest_framework import viewsets
 from .serializers import PozicijaSerializer, ZaposleniReadSerializer, ZaposleniWriteSerializer
 from .models import Pozicija, Zaposleni
+from core.mixins import SoftDeleteMixin
+from core.permissions import IsAdmin, IsZaposlen
+from rest_framework.filters import SearchFilter
 
 
-class PozicijaViewSet(viewsets.ModelViewSet):
-    queryset = Pozicija.objects.all()
+class PozicijaViewSet(SoftDeleteMixin, viewsets.ModelViewSet):
+    queryset = Pozicija.objects.filter(is_active=True)
     serializer_class = PozicijaSerializer
 
+    def get_permissions(self):
+        if self.action in ['list', 'retrieve']:
+            return [IsZaposlen()]
+        return [IsAdmin()]
 
-class ZaposleniViewSet(viewsets.ModelViewSet):
-    queryset = Zaposleni.objects.select_related('pozicija', 'user')
+
+class ZaposleniViewSet(SoftDeleteMixin, viewsets.ModelViewSet):
+    queryset = Zaposleni.objects.filter(is_active=True).select_related('pozicija', 'user')
+    filter_backends = [SearchFilter]
+    search_fields = ['ime', 'prezime', 'jmbg']
+
+    def get_permissions(self):
+        if self.action in ['list', 'retrieve']:
+            return [IsZaposlen()]
+        return [IsAdmin()]
 
     def get_serializer_class(self):
         if self.action in ['list', 'retrieve']:

@@ -29,16 +29,3 @@ class ZaliheReadSerializer(serializers.ModelSerializer):
     class Meta:
         model = Zalihe
         fields = '__all__'
-
-
-class ZaliheWriteSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Zalihe
-        fields = '__all__'
-
-    def validate(self, data):
-        if data.get('rezervisana_kolicina') is not None and data.get('kolicina') is not None:
-            if data['rezervisana_kolicina'] > data['kolicina']:
-                raise serializers.ValidationError('Rezervisana količina ne sme biti veća od dostupne količine')
-            
-        return data

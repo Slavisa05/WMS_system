@@ -1,5 +1,8 @@
 django 
 djangorestframework 
+djangorestframework-simplejwt
 django-cors-headers
 dotenv
 python-decouple
+django-filter
+psycopg2-binary

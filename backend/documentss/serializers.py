@@ -1,5 +1,6 @@
 from rest_framework import serializers
 from .models import Dokument, StavkeDokumenta
+from .services import obradi_dokument
 from partners.serializers import PoslovniPartnerSerializer
 from accounts.serializers import ZaposleniReadSerializer
 from warehouse.serializers import SkladisteSerializer
@@ -45,6 +46,14 @@ class DokumentWriteSerializer(serializers.ModelSerializer):
                 raise serializers.ValidationError('Skladište ulaza i izlaza ne mogu biti isti')
         
         return data
+    
+    def update(self, instance, validated_data):
+        novi_status = validated_data.get('status')
+        
+        if novi_status == 'ODOBREN' and instance.status != 'ODOBREN':
+            obradi_dokument(instance)
+        
+        return super().update(instance, validated_data)
 
 
 class StavkeDokumentaReadSerializer(serializers.ModelSerializer):
