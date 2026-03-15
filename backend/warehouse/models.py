@@ -37,6 +37,7 @@ class Sektor(BaseModel):
 class Slot(BaseModel):
     naziv = models.CharField(max_length=50, blank=False, null=False)
     sektor = models.ForeignKey(Sektor, on_delete=models.CASCADE)
+    kapacitet = models.PositiveIntegerField()
 
     class Meta:
         verbose_name_plural = "Slotovi"

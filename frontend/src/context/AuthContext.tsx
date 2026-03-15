@@ -29,16 +29,12 @@ const AuthProvider = ({ children }: { children: ReactNode }): JSX.Element => {
 
     const fetchUser = async () => {
         try {
-            const res = await api.get('/accounst/zaposleni/');
-            const zaposleni = res.data.result.find(
-                (z: User) => z.username === localStorage.getItem('username')
-            )
-
-            setUser(zaposleni);
+            const res = await api.get('/accounts/me/') 
+            setUser(res.data)
         } catch {
             localStorage.clear()
         } finally {
-            setIsLoading(false);
+            setIsLoading(false)
         }
     }
 
@@ -47,7 +43,12 @@ const AuthProvider = ({ children }: { children: ReactNode }): JSX.Element => {
         localStorage.setItem('access_token', res.data.access);
         localStorage.setItem('refresh_token', res.data.refresh);
         localStorage.setItem('username', username);
-        await fetchUser();
+        try {
+            await fetchUser();
+        } catch {
+            localStorage.clear();
+            throw new Error('Nije moguće učitati korisničke podatke.');
+        }
     }
 
     const logout = () => {

@@ -25,6 +25,7 @@ class Zaposleni(BaseModel):
 
     class Meta:
         verbose_name_plural = "Zaposleni"
+        ordering = ['prezime', 'ime']
 
 
     def clean(self):
