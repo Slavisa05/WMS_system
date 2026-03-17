@@ -30,10 +30,8 @@ type NavItem = {
 
 const NAV_ITEMS: NavItem[] = [
     { key: "dashboard", label: "Dashboard", icon: BarChart3, iconColor: "group-hover:text-cyan-500", to: "/dashboard", roles: ['Admin', 'Menadzer'] },
-    { key: "skladiste", label: "Skladište", icon: Building2, iconColor: "group-hover:text-emerald-500", roles: ['Admin', 'Menadzer'], children: [
-        { label: "Skladišta", to: "/skladista" },
-        { label: "Sektori", to: "/sektori" },
-        { label: "Slotovi", to: "/slotovi" },
+    { key: "skladiste", label: "Skladišta", icon: Building2, iconColor: "group-hover:text-emerald-500", roles: ['Admin', 'Menadzer'], children: [
+        { label: 'Sva skladista', to: "/skladista" },
     ]},
     { key: "inventar", label: "Inventar", icon: Boxes, iconColor: "group-hover:text-amber-500", children: [
         { label: "Kategorije", to: "/kategorije" },
@@ -42,7 +40,6 @@ const NAV_ITEMS: NavItem[] = [
     ]},
     { key: "dokumenta", label: "Dokumenta", icon: FileText, iconColor: "group-hover:text-blue-500", children: [
         { label: "Sva dokumenta", to: "/dokumenta" },
-        { label: "Stavke dokumenta", to: "/stavke-dokumenta" },
     ]},
     { key: "partneri", label: "Partneri", icon: Handshake, iconColor: "group-hover:text-rose-500", children: [
         { label: "Poslovni partneri", to: "/partneri" },

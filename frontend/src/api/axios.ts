@@ -14,6 +14,9 @@ api.interceptors.request.use((config) => {
     return config;
 })
 
+// Mutex: samo jedan refresh poziv odjednom
+let refreshPromise: Promise<string> | null = null;
+
 api.interceptors.response.use(
     (response) => response,
     
@@ -31,13 +34,22 @@ api.interceptors.response.use(
             }
 
             try {
-                const res = await axios.post('http://localhost:8000/api/token/refresh/', {
-                    refresh: refreshToken,
-                })
+                if (!refreshPromise) {
+                    refreshPromise = axios
+                        .post('http://localhost:8000/api/token/refresh/', { refresh: refreshToken })
+                        .then(res => {
+                            localStorage.setItem('access_token', res.data.access);
+                            if (res.data.refresh) {
+                                localStorage.setItem('refresh_token', res.data.refresh);
+                            }
+                            return res.data.access as string;
+                        })
+                        .finally(() => { refreshPromise = null; });
+                }
 
-                localStorage.setItem('access_token', res.data.access);
-                originalRequest.headers.Authorization = `Bearer ${res.data.access}`;
-                return api(originalRequest)
+                const newToken = await refreshPromise;
+                originalRequest.headers.Authorization = `Bearer ${newToken}`;
+                return api(originalRequest);
             } catch {
                 localStorage.clear();
                 window.location.href = '/login';

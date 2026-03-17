@@ -1,8 +1,9 @@
+import { useState } from "react";
+import { Plus, Search } from "lucide-react";
 import Header from "@/components/Header";
 import SkladisteCard from "@/components/SkladisteCard";
 import Button from "@/components/Button";
-import { useState } from "react";
-import { Plus, Search } from "lucide-react";
+import SearchBar from "@/components/SearchBar";
 
 interface Skladiste {
     id: number;
@@ -27,19 +28,12 @@ const SkladistaPage = () => {
         <section className="pr-[5%] flex flex-col gap-10">
             <Header heading='Skladista' />
 
-            <div className="flex flex-col sm:flex-row gap-3">
-                <div className="relative flex-1">
-                    <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-text-muted" />
-                    <input
-                        value={search}
-                        onChange={e => setSearch(e.target.value)}
-                        type="text"
-                        placeholder="Pretraži skladišta..."
-                        className="w-full pl-9 pr-4 py-2 rounded-xl border border-border text-sm transition-all duration-150 hover:border-primary focus:outline-none focus:border-primary"
-                    />
-                </div>
-                <Button icon={Plus} text="Dodaj novo skladište" />
-            </div>
+            <SearchBar
+                search={search}
+                onSearchChange={setSearch}
+                searchPlaceholder="Pretraži skladišta..."
+                action={<Button icon={Plus} text="Dodaj novo skladište" />}
+            />
 
             <div className="flex flex-wrap w-full gap-3">
                 {filteredSkladista.map(s => (
