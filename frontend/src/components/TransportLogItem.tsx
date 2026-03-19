@@ -1,4 +1,5 @@
 import { Truck } from "lucide-react";
+import { Link } from "react-router-dom";
 
 interface Vozilo {
     model: string;
@@ -6,6 +7,7 @@ interface Vozilo {
 }
 
 interface TransportLogItemProps {
+    id: number;
     vozilo: Vozilo;
     vozac: string;
     polazak: string;
@@ -21,19 +23,21 @@ const statusStyles: Record<TransportLogItemProps['status'], string> = {
     'NEUSPESNO': 'bg-gray-100 text-gray-600',
 };
 
-const TransportLogItem = ({ vozilo, vozac, polazak, dolazak, status }: TransportLogItemProps) => {
+const TransportLogItem = ({ id, vozilo, vozac, polazak, dolazak, status }: TransportLogItemProps) => {
     return(
-        <div className="flex justify-between items-center w-full px-5 py-2.5 bg-sidebar text-sidebar-text rounded-xl transition-all ease-out duration-300 hover:transform-[translateY(-5px)] hover:bg-sidebar-hover">
-            <div className="flex gap-4 items-center">
-                <Truck size={18} className="shrink-0 scale-150 text-orange-500" aria-hidden="true" />
+        <Link to={`/transporti/${id}`}>
+            <div className="flex justify-between items-center w-full px-5 py-2.5 bg-sidebar text-sidebar-text rounded-xl transition-all ease-out duration-300 hover:transform-[translateY(-5px)] hover:bg-sidebar-hover">
+                <div className="flex gap-4 items-center">
+                    <Truck size={18} className="shrink-0 scale-150 text-orange-500" aria-hidden="true" />
 
-                <div className="flex flex-col gap-2">
-                    <strong>{vozilo.registarskiBroj} · {vozilo.model}</strong>
-                    <span className="text-sm text-text-muted">Vozač: {vozac} · {polazak}{dolazak ? ` · ${dolazak}` : ''}</span>
+                    <div className="flex flex-col gap-2">
+                        <strong>{vozilo.registarskiBroj} · {vozilo.model}</strong>
+                        <span className="text-sm text-text-muted">Vozač: {vozac} · {polazak}{dolazak ? ` · ${dolazak}` : ''}</span>
+                    </div>
                 </div>
+                <p className={`px-2.5 py-1 rounded-xl text-sm font-medium ${statusStyles[status]}`}>{status}</p>
             </div>
-            <p className={`px-2.5 py-1 rounded-xl text-sm font-medium ${statusStyles[status]}`}>{status}</p>
-        </div>
+        </Link>
     );
 }
 

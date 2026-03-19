@@ -20,6 +20,12 @@ import DokumentaPage from '@/pages/DokumentaPage'
 import DokumentaDetaljiPage from '@/pages/DokumentaDetaljiPage'
 import PartneriPage from '@/pages/PartneriPage'
 import PartneriDetaljiPage from '@/pages/PartneriDetaljiPage'
+import VozilaPage from '@/pages/VozilaPage'
+import VozilaDetaljiPage from '@/pages/VozilaDetaljiPage'
+import TransportiPage from '@/pages/TransportiPage'
+import TransportiDetaljiPage from '@/pages/TransportiDetaljiPage'
+import ZaposleniPage from '@/pages/ZaposleniPage'
+import ZaposleniDetaljiPage from '@/pages/ZaposleniDetaljiPage'
 
 const App = () => {
   return (
@@ -51,7 +57,8 @@ const App = () => {
 
           <Route element={<AdminRoute />}>
             <Route element={<MainLayout />}>
-              {/* /zaposleni */}
+              <Route path="/zaposleni" element={<ZaposleniPage />} />
+              <Route path="/zaposleni/:id" element={<ZaposleniDetaljiPage />} />
             </Route>
           </Route>
 
@@ -62,6 +69,12 @@ const App = () => {
 
               <Route path="/partneri" element={<PartneriPage />} />
               <Route path="/partneri/:id" element={<PartneriDetaljiPage />} />
+
+              <Route path="/vozila" element={<VozilaPage />} />
+              <Route path="/vozila/:id" element={<VozilaDetaljiPage />} />
+
+              <Route path="/transporti" element={<TransportiPage />} />
+              <Route path="/transporti/:id" element={<TransportiDetaljiPage />} />
             </Route>
           </Route>
 

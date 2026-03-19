@@ -49,7 +49,6 @@ const NAV_ITEMS: NavItem[] = [
         { label: "Transporti", to: "/transporti" },
     ]},
     { key: "zaposleni", label: "Zaposleni", icon: Users, iconColor: "group-hover:text-fuchsia-500", roles: ['Admin'], children: [
-        { label: "Pozicije", to: "/pozicije" },
         { label: "Zaposleni", to: "/zaposleni" },
     ]},
     { key: "izvestaji", label: "Izveštaji", icon: LineChart, iconColor: "group-hover:text-lime-500", roles: ['Admin', 'Menadzer'], to: "/izvestaji" },

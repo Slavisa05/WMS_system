@@ -1,6 +1,7 @@
 import { Clock, Calendar, User, Building2, LogIn, LogOut, Truck } from "lucide-react"
 import Header from "@/components/Header";
 import Button from "@/components/Button";
+import StavkeDokumenta from "@/components/StavkeDokumenta";
 
 interface StavkaDokumenta {
     id: number;
@@ -18,7 +19,7 @@ const DokumentaDetaljiPage = () => {
         { id: 2, proizvod: 'Pepsi 500ml', slotUlaza: 'Slot A2', slotIzlaza: '—', kolicina: 200, jedinicaMere: 'kom', cena: 45 },
         { id: 3, proizvod: 'Pepsi 500ml', slotUlaza: 'Slot A2', slotIzlaza: '—', kolicina: 200, jedinicaMere: 'kom', cena: 45 },
     ];
-    const ukupno = stavke.reduce((sum, s) => sum + s.kolicina * s.cena, 0);
+
     return(
         <section className="pr-[5%] flex flex-col gap-10">
             <Header heading="Dokument" />
@@ -41,40 +42,15 @@ const DokumentaDetaljiPage = () => {
                 <p className="flex items-center gap-2"><Truck size={16} className="text-text-muted shrink-0" />Transport: /</p>
             </div>
 
-            <div className="flex flex-col rounded-xl overflow-hidden border border-border">
-                <div className="px-5 py-3 bg-sidebar">
-                    <strong className="text-sidebar-text">Stavke dokumenta</strong>
+            <div className="flex flex-col gap-2">
+                <h2>Stavke Dokumenta</h2>
+                <div className="flex flex-wrap gap-2">
+                    {stavke.map(s => {
+                        return(
+                            <StavkeDokumenta key={s.id} proizvod={s.proizvod} slotUlaza={s.slotUlaza} slotIzlaza={s.slotIzlaza} kolicina={s.kolicina} jedinicaMere={s.jedinicaMere} cena={s.cena} />
+                        );
+                    })}
                 </div>
-                <table className="w-full text-sm">
-                    <thead>
-                        <tr className="bg-sidebar text-sidebar-text border-t border-border">
-                            <th className="text-left px-5 py-2.5 font-medium">Proizvod</th>
-                            <th className="text-left px-5 py-2.5 font-medium">Slot ulaza</th>
-                            <th className="text-left px-5 py-2.5 font-medium">Slot izlaza</th>
-                            <th className="text-right px-5 py-2.5 font-medium">Količina</th>
-                            <th className="text-right px-5 py-2.5 font-medium">Cena</th>
-                            <th className="text-right px-5 py-2.5 font-medium">Ukupno</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {stavke.map((s, i) => (
-                            <tr key={s.id} className={i % 2 === 0 ? 'bg-background' : 'bg-sidebar/40'}>
-                                <td className="px-5 py-2.5">{s.proizvod}</td>
-                                <td className="px-5 py-2.5 text-text-muted">{s.slotUlaza}</td>
-                                <td className="px-5 py-2.5 text-text-muted">{s.slotIzlaza}</td>
-                                <td className="px-5 py-2.5 text-right">{s.kolicina} {s.jedinicaMere}</td>
-                                <td className="px-5 py-2.5 text-right">{s.cena} rsd</td>
-                                <td className="px-5 py-2.5 text-right font-medium">{(s.kolicina * s.cena).toLocaleString('sr-RS')} rsd</td>
-                            </tr>
-                        ))}
-                    </tbody>
-                    <tfoot>
-                        <tr className="border-t border-border bg-sidebar">
-                            <td colSpan={5} className="px-5 py-3 text-right text-sidebar-text font-medium">Ukupno:</td>
-                            <td className="px-5 py-3 text-right text-sidebar-text font-bold">{ukupno.toLocaleString('sr-RS')} rsd</td>
-                        </tr>
-                    </tfoot>
-                </table>
             </div>
         </section>
     );

@@ -56,9 +56,7 @@ const DokumentaPage = () => {
             <div className="flex flex-col gap-4">
                 {filtered.map(d => {
                     return (
-                        <Link to={`/dokumenta/${d.id}`}>
-                            <DocumentLogItem key={d.id} id={d.id} tip={d.tip} datumVreme={d.datumVreme} status={d.status} zaposleni={d.zaposleni} poslovniPartner={d.poslovniPartner} />
-                        </Link>
+                        <DocumentLogItem key={d.id} id={d.id} tip={d.tip} datumVreme={d.datumVreme} status={d.status} zaposleni={d.zaposleni} poslovniPartner={d.poslovniPartner} />
                     );
                 })}
                 {filtered.length === 0 && (

@@ -37,11 +37,11 @@ const DashboardPage = () => {
 
                 <div className="w-full rounded-xl flex flex-col gap-2">
                     <h2>Poslednji transporti</h2>
-                    <TransportLogItem vozilo={{model: 'VW Crafter', registarskiBroj: 'BG-1234-BG'}} vozac="Mirko Mirkovic" polazak="08:00" status="ZAKAZANO" />
-                    <TransportLogItem vozilo={{model: 'Mercedes Sprinter', registarskiBroj: 'BG-4321-BG'}} vozac="Marko MArkovic" polazak="09:00" status="U_TOKU" />
-                    <TransportLogItem vozilo={{model: 'Ford Transit', registarskiBroj: 'BG-4324-GB'}} vozac="Filip Filipovic" polazak="10:00" status="ZAVRSENO" />
-                    <TransportLogItem vozilo={{model: 'Iveco Daily', registarskiBroj: 'BG-7654-SD'}} vozac="Mirko Mirkovic" polazak="11:00" status="OTKAZANO" />
-                    <TransportLogItem vozilo={{model: 'Renault Master', registarskiBroj: 'BG-5234-AG'}} vozac="Marko MArkovic" polazak="12:00" status="NEUSPESNO" />
+                    <TransportLogItem id={1} vozilo={{model: 'VW Crafter', registarskiBroj: 'BG-1234-BG'}} vozac="Mirko Mirkovic" polazak="08:00" status="ZAKAZANO" />
+                    <TransportLogItem id={2} vozilo={{model: 'Mercedes Sprinter', registarskiBroj: 'BG-4321-BG'}} vozac="Marko MArkovic" polazak="09:00" status="U_TOKU" />
+                    <TransportLogItem id={3} vozilo={{model: 'Ford Transit', registarskiBroj: 'BG-4324-GB'}} vozac="Filip Filipovic" polazak="10:00" status="ZAVRSENO" />
+                    <TransportLogItem id={4} vozilo={{model: 'Iveco Daily', registarskiBroj: 'BG-7654-SD'}} vozac="Mirko Mirkovic" polazak="11:00" status="OTKAZANO" />
+                    <TransportLogItem id={5} vozilo={{model: 'Renault Master', registarskiBroj: 'BG-5234-AG'}} vozac="Marko MArkovic" polazak="12:00" status="NEUSPESNO" />
                 </div>
             </div>
         </section>
