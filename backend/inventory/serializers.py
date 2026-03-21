@@ -7,7 +7,7 @@ from warehouse.serializers import SlotReadSerializer
 class KategorijaSerializer(serializers.ModelSerializer):
     broj_proizvoda_ukupno = serializers.SerializerMethodField()
 
-    def get_broj_proizvoda(self, obj):
+    def get_broj_proizvoda_ukupno(self, obj):
         return obj.proizvod_set.count()
 
     class Meta:

@@ -4,30 +4,22 @@ import Header from "@/components/Header";
 import Button from "@/components/Button";
 import SearchBar from "@/components/SearchBar";
 import ZaposleniCard from "@/components/ZaposleniCard";
-
-interface Zaposleni {
-    id: number;
-    ime: string;
-    prezime: string;
-    ugovorDo: string;
-    pozicija: 'Zaposleni' | 'Menadzer' | 'Admin';
-} 
+import useZaposlene from "@/hooks/useZaposlene";
 
 const ZaposleniPage = () => {
-    const [zaposleni, setZaposleni] = useState<Zaposleni[]>([
-        { id: 1, ime: 'Mirko', prezime: 'Mirkovic', ugovorDo: '19/10/2026', pozicija: 'Zaposleni' },
-        { id: 2, ime: 'Andrija', prezime: 'Matic', ugovorDo: '19/10/2026', pozicija: 'Menadzer' },
-        { id: 3, ime: 'Slavisa', prezime: 'Arsenijevic', ugovorDo: '19/10/2026', pozicija: 'Admin' },
-    ]);
+    const { zaposlene, isLoading, error} = useZaposlene();
     const [search, setSearch] = useState('')
     const [selectedPozicija, setSelectedPozicija] = useState('')
 
-    const pozicija = [...new Set(zaposleni.map(z => z.pozicija))]
+    if (isLoading) return 'Loading...';
+    if (error) return `Greska: ${error}`;
+
+    const pozicija = [...new Set(zaposlene.map(z => z.pozicija?.naziv).filter((p): p is string => p != null))]
     
-    const filtered = zaposleni.filter(z => {
+    const filtered = zaposlene.filter(z => {
         const matchSearch = z.ime.toLowerCase().includes(search.toLowerCase())
             || z.prezime.toLowerCase().includes(search.toLowerCase())
-        const matchPozicija = selectedPozicija === '' || z.pozicija === selectedPozicija
+        const matchPozicija = selectedPozicija === '' || z.pozicija?.naziv === selectedPozicija
         return matchSearch && matchPozicija
     })
     
@@ -47,7 +39,7 @@ const ZaposleniPage = () => {
             <div className="flex flex-wrap gap-2">
                 {filtered.map(z => {
                     return(
-                        <ZaposleniCard key={z.id} id={z.id} ime={z.ime} prezime={z.prezime} ugovorDo={z.ugovorDo} pozicija={z.pozicija} />
+                        <ZaposleniCard key={z.id} {...z} />
                     );
                 })}
             </div>

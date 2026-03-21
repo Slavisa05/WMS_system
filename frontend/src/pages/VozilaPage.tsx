@@ -1,31 +1,23 @@
 import { useState } from "react";
-import { Move3D, Plus } from "lucide-react";
+import { Plus } from "lucide-react";
 import Header from "@/components/Header";
 import Button from "@/components/Button";
 import SearchBar from "@/components/SearchBar";
 import VoziloCard from "@/components/VoziloCard";
-
-interface Vozilo {
-    id: number;
-    model: string;
-    registarskiBroj: string;
-    datumRegistracije: string;
-    poslednjiTehnicki: string;
-    zaduzeniVozac: string;
-}
+import useVozila from "@/hooks/useVozila";
 
 const VozilaPage = () => {
-    const [vozila, setVozila] = useState<Vozilo[]>([
-        { id: 1, model: 'VW Crafter', registarskiBroj: 'BG-1234-BG', datumRegistracije: '19/10/2025', poslednjiTehnicki: '19/02/2026', zaduzeniVozac: 'Mirko Mirkovic'},
-        { id: 1, model: 'Mercedes Sprinter', registarskiBroj: 'BG-4321-BG', datumRegistracije: '19/10/2025', poslednjiTehnicki: '19/02/2026', zaduzeniVozac: 'Marko Markovic'},
-        { id: 1, model: 'Ford Transit', registarskiBroj: 'BG-4324-GB', datumRegistracije: '19/10/2025', poslednjiTehnicki: '19/02/2026', zaduzeniVozac: 'Mirko Markovic'},
-    ])
+    const { vozila, isLoading, error } = useVozila()
     const [search, setSearch] = useState('')
+
+    if (isLoading) return 'Loading...';
+    if (error) return `Greska: ${error}`;
 
     const filtered = vozila.filter(v => {
         const matchSearch = v.model.toLowerCase().includes(search.toLowerCase())
-            || v.registarskiBroj.toLowerCase().includes(search.toLowerCase())
-            || v.zaduzeniVozac.toLowerCase().includes(search.toLowerCase())
+            || v.registarski_broj.toLowerCase().includes(search.toLowerCase())
+            || v.zaduzeni_vozac.ime.toLowerCase().includes(search.toLowerCase())
+            || v.zaduzeni_vozac.prezime.toLowerCase().includes(search.toLowerCase())
         return matchSearch 
     })
 
@@ -43,7 +35,7 @@ const VozilaPage = () => {
             <div className="flex flex-wrap gap-2">
                 {filtered.map(v => {
                     return(
-                        <VoziloCard key={v.id} id={v.id} model={v.model} registarskiBroj={v.registarskiBroj} datumRegistracije={v.datumRegistracije} poslednjiTehnicki={v.poslednjiTehnicki} zaduzeniVozac={v.zaduzeniVozac} />
+                        <VoziloCard key={v.id} id={v.id} model={v.model} registarski_broj={v.registarski_broj} datum_registracije={v.datum_registracije} poslednji_tehnicki={v.poslednji_tehnicki} zaduzeni_vozac={v.zaduzeni_vozac} />
                     );
                 })}
             </div>

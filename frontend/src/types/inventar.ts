@@ -3,7 +3,7 @@ import type { Slot } from "./skladiste"
 export interface Kategorija {
     id: number
     naziv: string
-    broj_proizvoda: number
+    broj_proizvoda_ukupno: number
 }
 
 export interface Proizvod {

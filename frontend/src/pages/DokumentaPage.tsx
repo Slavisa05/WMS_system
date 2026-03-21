@@ -1,39 +1,29 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
-import { Search, Plus } from "lucide-react";
+import { Plus } from "lucide-react";
 import Header from "@/components/Header";
 import Button from "@/components/Button";
 import DocumentLogItem from "@/components/DocumentLogItem";
 import SearchBar from "@/components/SearchBar";
-
-interface Dokument {
-    id: number;
-    tip: 'PRIJEMNICA' | 'POVRATNICA_K' | 'OTPREMNICA' | 'POVRATNICA_D' | 'MEDJUSKLADISNICA' 
-        | 'PRENOS' | 'INVENTAR' | 'OTPIS';
-    status: 'NA_CEKANJU' | 'ODOBREN' | 'ODBIJEN';
-    datumVreme: string;
-    zaposleni: string;
-    poslovniPartner?: string;
-}
+import useDokumenta from "@/hooks/useDokumenta";
 
 const DokumentaPage = () => {
-    const [dokumenti, setDokumenti] = useState<Dokument[]>([
-        { id: 1, tip: 'PRIJEMNICA', status: 'ODOBREN', datumVreme: '17/11/2025 15:00:00h', zaposleni: 'Mirko Mirkovic', poslovniPartner: 'IDEA' },
-        { id: 2, tip: 'OTPREMNICA', status: 'NA_CEKANJU', datumVreme: '18/11/2025 14:30:00h', zaposleni: 'Mirko Markovic', poslovniPartner: 'MAXI' },
-        { id: 3, tip: 'MEDJUSKLADISNICA', status: 'ODBIJEN', datumVreme: '19/11/2025 17:00:00h', zaposleni: 'Marko Mirkovic' },
-    ]);
+    const { dokumenta, isLoading, error } = useDokumenta()
     const [search, setSearch] = useState('');
     const [selectedTip, setSelectedTip] = useState('');
     const [selectedStatus, setSelectedStatus] = useState('');
 
-    const tip = [...new Set(dokumenti.map(d => d.tip))];
-    const status = [...new Set(dokumenti.map(d => d.status))];
+    if (isLoading) return 'Loading...';
+    if (error) return `Greska: ${error}`;
 
-    const filtered = dokumenti.filter(d => {
-        const matchSearch = d.datumVreme.toLowerCase().includes(search.toLowerCase())
+    const tip = [...new Set(dokumenta.map(d => d.tip))];
+    const status = [...new Set(dokumenta.map(d => d.status))];
+
+    const filtered = dokumenta.filter(d => {
+        const matchSearch = d.datum_vreme.toLowerCase().includes(search.toLowerCase())
             || d.tip.toLowerCase().includes(search.toLowerCase())
             || d.status.toLowerCase().includes(search.toLowerCase())
-            || d.zaposleni.toLowerCase().includes(search.toLowerCase());
+            || d.zaposleni.ime.toLowerCase().includes(search.toLowerCase())
+            || d.zaposleni.prezime.toLowerCase().includes(search.toLowerCase());
         const matchTip = selectedTip === '' || d.tip === selectedTip;
         const matchStatus = selectedStatus === '' || d.status === selectedStatus;
         return matchSearch && matchTip && matchStatus;
@@ -56,7 +46,7 @@ const DokumentaPage = () => {
             <div className="flex flex-col gap-4">
                 {filtered.map(d => {
                     return (
-                        <DocumentLogItem key={d.id} id={d.id} tip={d.tip} datumVreme={d.datumVreme} status={d.status} zaposleni={d.zaposleni} poslovniPartner={d.poslovniPartner} />
+                        <DocumentLogItem key={d.id} {...d} />
                     );
                 })}
                 {filtered.length === 0 && (

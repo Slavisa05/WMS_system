@@ -5,5 +5,5 @@ export interface PoslovniPartner {
     email: string
     adresa: string
     telefon: string
-    tip: 'D' | 'K'
+    tip: 'dobavljac' | 'kupac'
 }

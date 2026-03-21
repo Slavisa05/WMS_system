@@ -29,7 +29,7 @@ class SlotReadSerializer(serializers.ModelSerializer):
     slobodan_kapacitet = serializers.SerializerMethodField()
 
     def get_zauzet_kapacitet(self, obj):
-        return obj.inventar_set.aggregate(
+        return obj.zalihe_set.aggregate(
             total=Sum('kolicina')
         )['total'] or 0
 

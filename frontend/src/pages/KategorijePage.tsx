@@ -1,28 +1,22 @@
 import { useState } from "react";
-import { Search, Plus } from "lucide-react";
+import { Plus } from "lucide-react";
 import Header from "@/components/Header";
 import Button from "@/components/Button";
 import KategorijaItem from "@/components/KategorijaItem";
 import SearchBar from "@/components/SearchBar";
-
-interface Kategorija {
-    id: number;
-    naziv: string;
-    brojProizvoda: number;
-}
+import useKategorije from "@/hooks/useKategorije";
 
 const KategorijePage = () => {
-    const [kategorije, setKategorije] = useState<Kategorija[]>([
-            { id: 1, naziv: 'sokovi', brojProizvoda: 20 },
-            { id: 2, naziv: 'grickalice', brojProizvoda: 50 },
-            { id: 3, naziv: 'alkohol', brojProizvoda: 30 },
-            { id: 4, naziv: 'kesice', brojProizvoda: 100 },
-        ])
-        const [search, setSearch] = useState('')
-    
-        const filteredKategorija = kategorije.filter(k =>
-            k.naziv.toLowerCase().includes(search.toLowerCase())
-        )
+    const { kategorije, isLoading, error } = useKategorije();
+    const [search, setSearch] = useState('')
+
+    const filteredKategorija = kategorije.filter(k =>
+        k.naziv.toLowerCase().includes(search.toLowerCase())
+    )
+
+    if (isLoading) return 'Loading...';
+    if (error) return `Greska: ${error}`;
+
 
     return(
         <section className="pr-[5%] flex flex-col gap-10">
@@ -36,7 +30,7 @@ const KategorijePage = () => {
 
             <div className="flex flex-wrap gap-4">
                 {filteredKategorija.map(k => (
-                    <KategorijaItem key={k.id} id={k.id} naziv={k.naziv} brojProizvoda={k.brojProizvoda} />
+                    <KategorijaItem key={k.id} {...k} />
                 ))}
             </div>
         </section>

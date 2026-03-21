@@ -12,7 +12,7 @@ const useTransport = (id: number) => {
             .then(res => setTransport(res.data))
             .catch(() => setError('Greska pri ucitavanju transporta.'))
             .finally(() => setIsLoading(false))
-    }, []);
+    }, [id]);
 
     return { transport, isLoading, error }
 }

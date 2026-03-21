@@ -4,25 +4,15 @@ import Header from "@/components/Header"
 import Button from "@/components/Button"
 import SearchBar from "@/components/SearchBar"
 import PartneriCard from "@/components/PartneriCard";
-
-interface Partneri {
-    id: number;
-    naziv: string;
-    pib: string;
-    email: string;
-    adresa: string;
-    telefon: string;
-    tip: 'dobavljac' | 'kupac';
-}
+import usePartneri from "@/hooks/usePartneri";
 
 const PartneriPage = () => {
-    const [partneri, setPartneri] = useState<Partneri[]>([
-        { id: 1, naziv: 'IDEA', pib: '123456789', email: 'idea@gmail.com', adresa: 'Prvog Maja 61, Ub 14210', telefon: '0640811781', tip: 'dobavljac'},
-        { id: 2, naziv: 'MAXI', pib: '987654321', email: 'maxi@gmail.com', adresa: 'Prvog Maja 61, Ub 14210', telefon: '0640811782', tip: 'kupac'},
-        { id: 3, naziv: 'RODA', pib: '123789456', email: 'roda@gmail.com', adresa: 'Prvog Maja 61, Ub 14210', telefon: '0640811783', tip: 'dobavljac'},
-    ]);
+    const { partneri, isLoading, error } = usePartneri()
     const [search, setSearch] = useState('');
     const [selectedTip, setSelectedTip] = useState('');
+
+    if (isLoading) return 'Loading...';
+    if (error) return `Greska: ${error}`;
 
     const tip = [...new Set(partneri.map(p => p.tip))];
 
@@ -51,7 +41,7 @@ const PartneriPage = () => {
 
             <div className="flex flex-wrap gap-4">
                 {filtered.map(p => (
-                    <PartneriCard key={p.id} id={p.id} naziv={p.naziv} pib={p.pib} email={p.email} adresa={p.adresa} telefon={p.telefon} tip={p.tip} />
+                    <PartneriCard key={p.id} {...p} />
                 ))}
             </div>
         </section>

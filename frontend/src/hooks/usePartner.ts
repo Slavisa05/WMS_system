@@ -12,7 +12,7 @@ const usePartner = (id: number) => {
             .then(res => setPartner(res.data))
             .catch(() => setError('Greska pri ucitavanju partnera.'))
             .finally(() => setIsLoading(false))
-    }, []);
+    }, [id]);
 
     return { partner, isLoading, error }
 }

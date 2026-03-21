@@ -1,4 +1,4 @@
-import { Truck, User, CalendarArrowUp, CalendarArrowDown, Activity } from "lucide-react";
+import { Truck, User, CalendarArrowUp, CalendarArrowDown, Activity, StickyNote } from "lucide-react";
 import Header from "@/components/Header";
 import Button from "@/components/Button";
 import DocumentLogItem from "@/components/DocumentLogItem";
@@ -36,6 +36,7 @@ const TransportiDetaljiPage = () => {
                 <p className="flex items-center gap-2"><CalendarArrowUp size={16} className="text-text-muted shrink-0" />Polazak: 18/03/2026 18:00h</p>
                 <p className="flex items-center gap-2"><CalendarArrowDown size={16} className="text-text-muted shrink-0" />Dolazak: /</p>
                 <p className="flex items-center gap-2"><Activity size={16} className="text-text-muted shrink-0" />Status: U_TOKU</p>
+                <p className="flex items-center gap-2"><StickyNote size={16} className="text-text-muted shrink-0" />Napomena: Mirko polako vozi</p>
             </div>
 
             <div className="flex flex-col gap-2">

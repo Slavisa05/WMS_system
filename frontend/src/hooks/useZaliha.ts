@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { getZaliha } from "@/api/zalihe";
 import type { Zalihe } from "@/types/inventar";
 
-const useZalihe = (id: number) => {
+const useZaliha = (id: number) => {
     const [zaliha, setZaliha] = useState<Zalihe>();
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
@@ -17,4 +17,4 @@ const useZalihe = (id: number) => {
     return { zaliha, isLoading, error }
 }
 
-export default useZalihe
+export default useZaliha

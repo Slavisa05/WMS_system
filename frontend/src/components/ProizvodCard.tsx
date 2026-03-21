@@ -1,16 +1,8 @@
 import { Link } from "react-router-dom";
 import { Barcode, Hash, Ruler, Tag } from "lucide-react";
+import type { Proizvod } from "@/types/inventar";
 
-interface ProizvodCardProps {
-    id: number;
-    naziv: string;
-    barkod: string;
-    sifra: string;
-    jedinica_mere: string;
-    kategorija: string;
-}
-
-const ProizvodCard = ({ id, naziv, barkod, sifra, jedinica_mere, kategorija }: ProizvodCardProps) => {
+const ProizvodCard = ({ id, naziv, barkod, sifra, jedinica_mere, kategorija }: Proizvod) => {
     return(
         <Link className="basis-[calc(25%-0.75rem)] min-w-56 grow" to={`/proizvodi/${id}`}>
             <div className="h-full cursor-pointer flex flex-col gap-3 px-5 py-4 bg-sidebar text-sidebar-text rounded-xl transition-all ease-out duration-300 hover:transform-[translateY(-5px)] hover:bg-sidebar-hover">
@@ -19,7 +11,7 @@ const ProizvodCard = ({ id, naziv, barkod, sifra, jedinica_mere, kategorija }: P
                     <p className="flex items-center gap-2"><Barcode size={14} className="text-text-muted shrink-0" />{barkod}</p>
                     <p className="flex items-center gap-2"><Hash size={14} className="text-text-muted shrink-0" />{sifra}</p>
                     <p className="flex items-center gap-2"><Ruler size={14} className="text-text-muted shrink-0" />{jedinica_mere}</p>
-                    <p className="flex items-center gap-2"><Tag size={14} className="text-text-muted shrink-0" />{kategorija}</p>
+                    <p className="flex items-center gap-2"><Tag size={14} className="text-text-muted shrink-0" />{kategorija.naziv}</p>
                 </div>
             </div>
         </Link>

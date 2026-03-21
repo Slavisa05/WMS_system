@@ -4,37 +4,24 @@ import Header from "@/components/Header";
 import Button from "@/components/Button";
 import SearchBar from "@/components/SearchBar";
 import TransportLogItem from "@/components/TransportLogItem";
-
-interface Vozilo {
-    model: string;
-    registarskiBroj: string;
-}
-
-interface Transport {
-    id: number;
-    vozilo: Vozilo;
-    vozac: string;
-    polazak: string;
-    dolazak?: string;
-    status: 'ZAKAZANO' | 'U_TOKU' | 'ZAVRSENO' | 'OTKAZANO' | 'NEUSPESNO';
-}
+import useTransporti from "@/hooks/useTransporti";
 
 const TransportiPage = () => {
-    const [transporti, setTransporti] = useState<Transport[]>([
-        { id: 1, vozilo: {model: 'VW Crafter', registarskiBroj: 'BG-1234-BG'}, vozac: 'Mirko Mirkovic', polazak: '18/03/2026 18:00h', status: 'U_TOKU' },
-        { id: 1, vozilo: {model: 'VW Crafter', registarskiBroj: 'BG-1234-BG'}, vozac: 'Mirko Mirkovic', polazak: '18/03/2026 18:00h', status: 'NEUSPESNO' },
-        { id: 1, vozilo: {model: 'VW Crafter', registarskiBroj: 'BG-1234-BG'}, vozac: 'Mirko Mirkovic', polazak: '18/03/2026 18:00h', status: 'ZAKAZANO' },
-    ])
+    const { transporti ,isLoading, error } = useTransporti()
     const [search, setSearch] = useState('')
     const [selectedStatus, setSelectedStatus] = useState('')
+
+    if (isLoading) return 'Loading...';
+    if (error) return `Greska: ${error}`;
 
     const status = [...new Set(transporti.map(t => t.status))]
     
     const filtered = transporti.filter(t => {
         const matchSearch = t.vozilo.model.toLowerCase().includes(search.toLowerCase())
-            || t.vozilo.registarskiBroj.toLowerCase().includes(search.toLowerCase())
-            || t.vozac.toLowerCase().includes(search.toLowerCase())
-            || t.polazak.toLowerCase().includes(search.toLowerCase())
+            || t.vozilo.registarski_broj.toLowerCase().includes(search.toLowerCase())
+            || t.vozac?.ime.toLowerCase().includes(search.toLowerCase())
+            || t.vozac?.prezime.toLowerCase().includes(search.toLowerCase())
+            || t.datum_polaska.toLowerCase().includes(search.toLowerCase())
         const matchStatus = selectedStatus === '' || t.status === selectedStatus
         return matchSearch && matchStatus
     })
@@ -55,7 +42,7 @@ const TransportiPage = () => {
             <div className="flex flex-col w-full gap-2">
                 {filtered.map(t => {
                     return(
-                        <TransportLogItem key={t.id} id={t.id} vozilo={t.vozilo} vozac={t.vozac} polazak={t.polazak} dolazak={t.dolazak} status={t.status} />
+                        <TransportLogItem key={t.id} {...t} />
                     );
                 })}
             </div>

@@ -50,18 +50,19 @@ class Zalihe(BaseModel):
     slot = models.ForeignKey(Slot, blank=False, null=False, on_delete=models.PROTECT)
 
     class Meta:
+        verbose_name_plural = "Zalihe"
         unique_together = ('proizvod', 'slot')
 
     def clean(self):
         super().clean()
 
-        if self.kolicina < 0:
+        if self.kolicina is not None and self.kolicina < 0:
             raise ValidationError('Količina ne može biti negativna')
         
-        if self.rezervisana_kolicina < 0:
+        if self.rezervisana_kolicina is not None and self.rezervisana_kolicina < 0:
             raise ValidationError('Rezervisana količina ne može biti negativna')
         
-        if self.rezervisana_kolicina > self.kolicina:
+        if self.rezervisana_kolicina is not None and self.kolicina is not None and self.rezervisana_kolicina > self.kolicina:
             raise ValidationError('Ne možete rezervisati veću količinu od one koje trenutno imate')
         
     def __str__(self):

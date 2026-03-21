@@ -2,6 +2,11 @@ import { useEffect, useState } from "react";
 import { getProizvodi } from "@/api/proizvod";
 import type { Proizvod } from "@/types/inventar";
 
+interface PaginatedResponse<T> {
+    count: number;
+    results: T[];
+}
+
 const useProizvodi = () => {
     const [proizvodi, setProizvodi] = useState<Proizvod[]>([]);
     const [isLoading, setIsLoading] = useState(true);
@@ -9,7 +14,10 @@ const useProizvodi = () => {
 
     useEffect(() => {
         getProizvodi()
-            .then(res => setProizvodi(res.data))
+            .then(res => {
+                const data = res.data as PaginatedResponse<Proizvod> | Proizvod[];
+                setProizvodi(Array.isArray(data) ? data : data.results);
+            })
             .catch(() => setError('Greska pri ucitavanju proizvoda.'))
             .finally(() => setIsLoading(false))
     }, []);

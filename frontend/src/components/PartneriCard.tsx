@@ -1,17 +1,8 @@
 import { Link } from "react-router-dom";
 import { Hash, Mail, MapPin, Phone, Tag } from "lucide-react";
+import type { PoslovniPartner } from "@/types/partner";
 
-interface PartneriCardProps {
-    id: number;
-    naziv: string;
-    pib: string;
-    email: string;
-    adresa: string;
-    telefon: string;
-    tip: 'dobavljac' | 'kupac';
-}
-
-const PartneriCard = ({ id, naziv, pib, email, adresa, telefon, tip }: PartneriCardProps) => {
+const PartneriCard = ({ id, naziv, pib, email, adresa, telefon, tip }: PoslovniPartner) => {
     return(
         <Link className="basis-[calc(25%-0.75rem)] min-w-56 grow" to={`/partneri/${id}`}>
             <div className="h-full cursor-pointer flex flex-col gap-3 px-5 py-4 bg-sidebar text-sidebar-text rounded-xl transition-all ease-out duration-300 hover:transform-[translateY(-5px)] hover:bg-sidebar-hover">
