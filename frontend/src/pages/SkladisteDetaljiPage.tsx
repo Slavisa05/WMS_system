@@ -1,34 +1,28 @@
 import { useParams } from 'react-router-dom'
-import { useEffect, useState } from 'react'
-import { Plus, MapPin, Tag, Boxes, PackageCheck, PackageOpen } from "lucide-react";
-import api from '@/api/axios'
+import { Plus, MapPin, Tag, Boxes, PackageCheck, PackageOpen, Phone } from "lucide-react";
 import Header from '@/components/Header'
 import Button from '@/components/Button'
 import SektorCard from '@/components/SektorCard'
-
-interface Skladiste {
-    id: number;
-    naziv: string;
-    adresa: string;
-    tip: 'DIST' | 'VELE' | 'MALO' | 'TRAN';
-}
+import useSkladiste from '@/hooks/useSkladiste';
+import useSektore from '@/hooks/useSektore';
+import useSlotovi from '@/hooks/useSlotovi';
 
 const SkladisteDetaljiPage = () => {
     const { id } = useParams();
-    const kapacitet = 500;
-    const zauzeto = 400;
-    const slobodno = kapacitet - zauzeto;
-    const procenat = Math.round((zauzeto / kapacitet) * 100);
-    // const [skladiste, setSkladiste] = useState<Skladiste | null>(null);
-    // const [loading, setLoading] = useState(true);
-    // const [error, setError] = useState<string | null>(null);
+    const { skladiste, isLoading, error } = useSkladiste(Number(id));
+    const { sektori } = useSektore();
+    const { slotovi } = useSlotovi();
 
-    // useEffect(() => {
-    //     api.get(`/skladista/${id}/`)
-    //         .then(res => setSkladiste(res.data))
-    //         .catch(() => setError('Greška pri učitavanju skladišta.'))
-    //         .finally(() => setLoading(false));
-    // }, [id]);
+    if (isLoading) return 'Loading...';
+    if (error) return `Greska: ${error}`;
+
+    const sektoriSkladista = sektori.filter(s => s.skladiste.id === skladiste?.id);
+
+    const slotoviSkladista = slotovi.filter(sl => sektoriSkladista.some(s => s.id === sl.sektor.id));
+    const kapacitet = slotoviSkladista.reduce((sum, sl) => sum + sl.kapacitet, 0);
+    const zauzeto = slotoviSkladista.reduce((sum, sl) => sum + sl.zauzet_kapacitet, 0);
+    const slobodno = kapacitet - zauzeto;
+    const procenat = kapacitet > 0 ? Math.round((zauzeto / kapacitet) * 100) : 0;
 
     return (
         <section className="pr-[5%] flex flex-col gap-10">
@@ -43,9 +37,10 @@ const SkladisteDetaljiPage = () => {
                     </div>
                 </div>
 
-                <p className="flex items-center gap-2"><MapPin size={16} className="text-text-muted" />Adresa: Prvog Maja 61, Ub 14210</p>
-                <p className="flex items-center gap-2"><Tag size={16} className="text-text-muted" />Tip: Veleprodajno</p>
-                <p className="flex items-center gap-2"><Boxes size={16} className="text-text-muted" />Kapacitet: 500</p>
+                <p className="flex items-center gap-2"><MapPin size={16} className="text-text-muted" />Adresa: {skladiste?.adresa}</p>
+                <p className="flex items-center gap-2"><Phone size={16} className="text-text-muted" />Telefon: {skladiste?.telefon}</p>
+                <p className="flex items-center gap-2"><Tag size={16} className="text-text-muted" />Tip: {skladiste?.tip}</p>
+                <p className="flex items-center gap-2"><Boxes size={16} className="text-text-muted" />Kapacitet: {kapacitet}</p>
                 <p className="flex items-center gap-2"><PackageCheck size={16} className="text-text-muted shrink-0" />Zauzeto: {zauzeto}</p>
                 <p className="flex items-center gap-2"><PackageOpen size={16} className="text-text-muted shrink-0" />Slobodno: {slobodno}</p>
             
@@ -75,21 +70,11 @@ const SkladisteDetaljiPage = () => {
                 </div>
 
                 <div className="sm:w-[50%] w-[90%] flex flex-col gap-4">
-                    <SektorCard id={1} naziv='Sektor A' brojSlotova={15} />
-                    <SektorCard id={2} naziv='Sektor B' brojSlotova={22} />
-                    <SektorCard id={3} naziv='Sektor C' brojSlotova={8} />
+                    {sektoriSkladista.map(s => (
+                        <SektorCard key={s.id} {...s} />
+                    ))}
                 </div>
             </div>
-
-            {/* {loading && <p>Učitavanje...</p>}
-            {error && <p className="text-red-500">{error}</p>}
-            {skladiste && (
-                <div className="flex flex-col gap-2">
-                    <h1 className="text-2xl font-bold">{skladiste.naziv}</h1>
-                    <p>Adresa: {skladiste.adresa}</p>
-                    <p>Tip: {skladiste.tip}</p>
-                </div>
-            )} */}
         </section>
     )
 }

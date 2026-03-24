@@ -3,35 +3,39 @@ import { Plus, Warehouse, Boxes, PackageCheck, PackageOpen } from "lucide-react"
 import Header from "@/components/Header";
 import Button from "@/components/Button";
 import SlotCard from "@/components/SlotCard";
-
-interface SektorPageProps {
-    id: number;
-    naziv: string;
-    brojSlotova: number;
-}
+import useSektor from "@/hooks/useSektor";
+import useSlotovi from "@/hooks/useSlotovi";
 
 const SektorPage = () => {
     const { id } = useParams();
-    const kapacitet = 300;
-    const zauzeto = 120;
+    const { sektor, isLoading, error } = useSektor(Number(id));
+    const { slotovi } = useSlotovi();
+
+    if (isLoading) return 'Loading...';
+    if (error) return `Greska: ${error}`;
+
+    const slotoviSektora = slotovi.filter(s => s.sektor.id === sektor?.id);
+
+    const kapacitet = slotoviSektora.reduce((sum, sl) => sum + sl.kapacitet, 0);
+    const zauzeto = slotoviSektora.reduce((sum, sl) => sum + sl.zauzet_kapacitet, 0);
     const slobodno = kapacitet - zauzeto;
-    const procenat = Math.round((zauzeto / kapacitet) * 100);
+    const procenat = kapacitet > 0 ? Math.round((zauzeto / kapacitet) * 100) : 0;
 
     return(
         <section className="pr-[5%] flex flex-col gap-10">
-            <Header heading={`sektor A`} />
+            <Header heading={'Detalji sektora'} />
 
             <div className="flex flex-col gap-2 p-4 bg-sidebar text-sidebar-text rounded-xl">
                 <div className="flex flex-wrap gap-8 justify-between items-center w-full">
-                    <h2>Sektor A</h2>
+                    <h2>{sektor?.naziv}</h2>
                     <div className="flex items-center gap-2 py-4 px-8 rounded-xl bg-sidebar">
                         <Button text='izmeni' />
                         <Button text='obriši' variant='secondary' />
                     </div>
                 </div>
 
-                <p className="flex items-center gap-2"><Warehouse size={16} className="text-text-muted shrink-0" />Skladište: veleprodajno</p>
-                <p className="flex items-center gap-2"><Boxes size={16} className="text-text-muted" />Kapacitet: 300</p>
+                <p className="flex items-center gap-2"><Warehouse size={16} className="text-text-muted shrink-0" />Skladište: {sektor?.skladiste.naziv}</p>
+                <p className="flex items-center gap-2"><Boxes size={16} className="text-text-muted" />Kapacitet: {kapacitet}</p>
                 <p className="flex items-center gap-2"><PackageCheck size={16} className="text-text-muted shrink-0" />Zauzeto: {zauzeto}</p>
                 <p className="flex items-center gap-2"><PackageOpen size={16} className="text-text-muted shrink-0" />Slobodno: {slobodno}</p>
             
@@ -61,9 +65,9 @@ const SektorPage = () => {
                 </div>
 
                 <div className="sm:w-[50%] w-[90%] flex flex-col gap-4">
-                    <SlotCard id={1} naziv="Slot 1" kapacitet={100} slobodanKapacitet={40} />
-                    <SlotCard id={2} naziv="Slot 2" kapacitet={50} slobodanKapacitet={50} />
-                    <SlotCard id={3} naziv="Slot 3" kapacitet={250} slobodanKapacitet={0} />
+                    {slotoviSektora.map(sl => (
+                        <SlotCard key={sl.id} {...sl} />
+                    ))}
                 </div>
             </div>
         </section>

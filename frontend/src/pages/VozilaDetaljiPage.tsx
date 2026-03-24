@@ -18,21 +18,21 @@ const VozilaDetaljiPage = () => {
 
     return(
         <section className="pr-[5%] flex flex-col gap-10">
-            <Header heading="VW Crafter" />
+            <Header heading="Vozilo" />
 
             <div className="flex flex-col gap-2 p-4 bg-sidebar text-sidebar-text rounded-xl">
                 <div className="flex flex-wrap gap-8 justify-between items-center w-full">
-                    <h2>VW Crafter</h2>
+                    <h2>{vozilo?.model}</h2>
                     <div className="flex items-center gap-2 py-4 px-8 rounded-xl bg-sidebar">
                         <Button text='izmeni' />
                         <Button text='obriši' variant='secondary' />
                     </div>
                 </div>
 
-                <p className="flex items-center gap-2"><Hash size={14} className="text-text-muted shrink-0" />Registarski broj: BG-1234-BG</p>
-                <p className="flex items-center gap-2"><CalendarCheck size={14} className="text-text-muted shrink-0" />Datum registracije: 19/10/2025</p>
-                <p className="flex items-center gap-2"><Wrench size={14} className="text-text-muted shrink-0" />Poslednji tehnicki: 19/02/2026</p>
-                <p className="flex items-center gap-2"><User size={14} className="text-text-muted shrink-0" />Zaduzeni vozac: Mirko Mirkovic</p>
+                <p className="flex items-center gap-2"><Hash size={14} className="text-text-muted shrink-0" />Registarski broj: {vozilo?.registarski_broj}</p>
+                <p className="flex items-center gap-2"><CalendarCheck size={14} className="text-text-muted shrink-0" />Datum registracije: {vozilo?.datum_registracije}</p>
+                <p className="flex items-center gap-2"><Wrench size={14} className="text-text-muted shrink-0" />Poslednji tehnicki: {vozilo?.poslednji_tehnicki}</p>
+                <p className="flex items-center gap-2"><User size={14} className="text-text-muted shrink-0" />Zaduzeni vozac: {vozilo?.zaduzeni_vozac.ime} {vozilo?.zaduzeni_vozac.prezime}</p>
             </div>
 
             <div className="flex flex-col gap-2">
