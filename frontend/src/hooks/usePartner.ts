@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { getPartner } from "@/api/partner";
 import type { PoslovniPartner } from "@/types/partner";
 
@@ -7,14 +7,19 @@ const usePartner = (id: number) => {
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
 
-    useEffect(() => {
+    const fetchData = useCallback(() => {       
+        setIsLoading(true)
         getPartner(id)
             .then(res => setPartner(res.data))
-            .catch(() => setError('Greska pri ucitavanju partnera.'))
-            .finally(() => setIsLoading(false))
-    }, [id]);
+            .catch(() => setError('Greška pri učitavanju kategorije.'))
+            .finally(() => setIsLoading(false));
+    }, [id])
 
-    return { partner, isLoading, error }
+    useEffect(() => {
+        fetchData()                             
+    }, [fetchData]);
+
+    return { partner, isLoading, error, refetch: fetchData }
 }
 
 export default usePartner

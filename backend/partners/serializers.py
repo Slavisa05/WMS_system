@@ -5,3 +5,4 @@ class PoslovniPartnerSerializer(serializers.ModelSerializer):
     class Meta:
         model = PoslovniPartner
         fields = '__all__'
+        

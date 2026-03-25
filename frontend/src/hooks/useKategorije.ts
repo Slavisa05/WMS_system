@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { getKategorije } from "@/api/kategorija";
 import type { Kategorija } from "@/types/inventar";
 
@@ -12,7 +12,8 @@ const useKategorije = () => {
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
 
-    useEffect(() => {
+    const fetchData = useCallback(() => {
+        setIsLoading(true)
         getKategorije()
             .then(res => {
                 const data = res.data as PaginatedResponse<Kategorija> | Kategorija[];
@@ -22,7 +23,11 @@ const useKategorije = () => {
             .finally(() => setIsLoading(false));
     }, []);
 
-    return { kategorije, isLoading, error }
+    useEffect(() => {
+        fetchData()
+    }, [fetchData])
+
+    return { kategorije, isLoading, error, refetch: fetchData }
 }
 
 export default useKategorije

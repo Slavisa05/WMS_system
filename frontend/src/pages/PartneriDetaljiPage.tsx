@@ -1,15 +1,52 @@
 import { Hash, Mail, MapPin, Phone, Tag } from "lucide-react";
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
+import { useState } from "react";
+import { updatePartner, deletePartner } from "@/api/partner";
 import Header from "@/components/Header";
 import Button from "@/components/Button";
 import DocumentLogItem from "@/components/DocumentLogItem";
 import usePartner from "@/hooks/usePartner";
 import useDokumenta from "@/hooks/useDokumenta";
+import Modal from "@/components/Modal";
+import ConfirmModal from "@/components/ConfirmModal";
+import PartnerForm from "@/components/forms/PartnerForm";
 
 const PartneriDetaljiPage = () => {
     const { id } = useParams()
-    const { partner, isLoading, error } = usePartner(Number(id))
+    const navigate = useNavigate()
+    const { partner, isLoading, error, refetch } = usePartner(Number(id))
     const { dokumenta } = useDokumenta()
+
+    const [isEditOpen, setIsEditOpen] = useState(false)
+    const [isDeleteOpen, setIsDeleteOpen] = useState(false)
+    const [isSubmitting, setIsSubmitting] = useState(false)
+
+    const handleEdit = async (data: { naziv: string }) => {
+        if (!partner) return
+        setIsSubmitting(true)
+        try {
+            await updatePartner(partner.id, data)
+            setIsEditOpen(false)
+            refetch()
+        } catch {
+            alert('Greška pri izmeni partnera')
+        } finally {
+            setIsSubmitting(false)
+        }
+    }
+
+    const handleDelete = async () => {
+        if (!partner) return
+        setIsSubmitting(true)
+        try {
+            await deletePartner(partner.id)
+            navigate('/partneri')     
+        } catch {
+            alert('Greška pri brisanju partnera')
+        } finally {
+            setIsSubmitting(false)
+        }
+    }
 
     if (isLoading) return 'Loading...';
     if (error) return `Greska: ${error}`;
@@ -24,8 +61,8 @@ const PartneriDetaljiPage = () => {
                 <div className="flex flex-wrap gap-8 justify-between items-center w-full">
                     <h2>{partner?.naziv}</h2>
                     <div className="flex items-center gap-2 py-4 px-8 rounded-xl bg-sidebar">
-                        <Button text='izmeni' />
-                        <Button text='obriši' variant='secondary' />
+                        <Button text='izmeni' onClick={() => setIsEditOpen(true)} />
+                        <Button text='obriši' variant='secondary' onClick={() => setIsDeleteOpen(true)} />
                     </div>
                 </div>
 
@@ -43,6 +80,25 @@ const PartneriDetaljiPage = () => {
                     <DocumentLogItem key={d.id} {...d} />
                 ))}
             </div>
+
+            <Modal isOpen={isEditOpen} title="Izmeni kategoriju" onClose={() => setIsEditOpen(false)}>
+                <PartnerForm
+                    initialData={partner}
+                    onSubmit={handleEdit}
+                    onCancel={() => setIsEditOpen(false)}
+                    isLoading={isSubmitting}
+                />
+            </Modal>
+
+            {/* Modal za brisanje */}
+            <ConfirmModal
+                isOpen={isDeleteOpen}
+                title="Izbriši kategoriju"
+                message={`Da li ste sigurni da želite da izbrišete partnera "${partner?.naziv}"?`}
+                onConfirm={handleDelete}
+                onCancel={() => setIsDeleteOpen(false)}
+                isLoading={isSubmitting}
+            />
         </section>
     );
 }

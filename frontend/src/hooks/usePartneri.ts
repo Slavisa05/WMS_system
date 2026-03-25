@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { getPartneri } from "@/api/partner";
 import type { PoslovniPartner } from "@/types/partner";
 
@@ -12,7 +12,8 @@ const usePartneri = () => {
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
 
-    useEffect(() => {
+    const fetchData = useCallback(() => {
+        setIsLoading(true)
         getPartneri()
             .then(res => {
                 const data = res.data as PaginatedResponse<PoslovniPartner> | PoslovniPartner[];
@@ -20,9 +21,13 @@ const usePartneri = () => {
             })
             .catch(() => setError('Greska pri ucitavanju partnera.'))
             .finally(() => setIsLoading(false))
-    }, []);
+    }, [])
 
-    return { partneri, isLoading, error }
+    useEffect(() => {
+        fetchData()
+    }, [fetchData]);
+
+    return { partneri, isLoading, error, refetch: fetchData }
 }
 
 export default usePartneri

@@ -1,15 +1,33 @@
 import { useState } from "react";
 import { Plus } from "lucide-react";
+import { createPartner } from "@/api/partner";
 import Header from "@/components/Header"
 import Button from "@/components/Button"
 import SearchBar from "@/components/SearchBar"
 import PartneriCard from "@/components/PartneriCard";
 import usePartneri from "@/hooks/usePartneri";
+import Modal from "@/components/Modal";
+import PartnerForm from "@/components/forms/PartnerForm";
 
 const PartneriPage = () => {
-    const { partneri, isLoading, error } = usePartneri()
+    const { partneri, isLoading, error, refetch } = usePartneri()
     const [search, setSearch] = useState('');
     const [selectedTip, setSelectedTip] = useState('');
+    const [isAddOpen, setIsAddOpen] = useState(false)
+    const [isSubmitting, setIsSubmitting] = useState(false)
+
+    const handleAdd = async (data: { naziv: string, pib: string, email: string, adresa: string, telefon: string, tip: 'D' | 'K' }) => {
+            setIsSubmitting(true)
+            try {
+                await createPartner(data)
+                setIsAddOpen(false)
+                refetch()
+            } catch {
+                alert('Greška pri dodavanju partnera')
+            } finally {
+                setIsSubmitting(false)
+            }
+        }
 
     if (isLoading) return 'Loading...';
     if (error) return `Greska: ${error}`;
@@ -36,7 +54,7 @@ const PartneriPage = () => {
                 filters={[
                     { value: selectedTip, onChange: setSelectedTip, placeholder: 'Svi tipovi', options: tip }
                 ]}
-                action={<Button icon={Plus} text="Dodaj partnera" />}
+                action={<Button onClick={() => setIsAddOpen(true)} icon={Plus} text="Dodaj partnera" />}
             />
 
             <div className="flex flex-wrap gap-4">
@@ -44,6 +62,14 @@ const PartneriPage = () => {
                     <PartneriCard key={p.id} {...p} />
                 ))}
             </div>
+
+            <Modal isOpen={isAddOpen} title="Novi partner" onClose={() => setIsAddOpen(false)}>
+                <PartnerForm 
+                    onSubmit={handleAdd}
+                    onCancel={() => setIsAddOpen(false)}
+                    isLoading={isSubmitting}
+                />
+            </Modal>
         </section>
     );
 }
