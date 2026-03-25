@@ -1,5 +1,6 @@
 import { Truck, User, CalendarArrowUp, CalendarArrowDown, Activity, StickyNote } from "lucide-react";
 import { useParams } from "react-router-dom";
+import { formatDatum } from "@/lib/utils";
 import Header from "@/components/Header";
 import Button from "@/components/Button";
 import DocumentLogItem from "@/components/DocumentLogItem";
@@ -31,8 +32,8 @@ const TransportiDetaljiPage = () => {
 
                 <p className="flex items-center gap-2"><Truck size={16} className="text-text-muted shrink-0" />Vozilo: {transport?.vozilo.model} {transport?.vozilo.registarski_broj}</p>
                 <p className="flex items-center gap-2"><User size={16} className="text-text-muted shrink-0" />Vozac: {transport?.vozac ? `${transport.vozac.ime} ${transport.vozac.prezime}` : '/'}</p>
-                <p className="flex items-center gap-2"><CalendarArrowUp size={16} className="text-text-muted shrink-0" />Polazak: {transport?.datum_polaska}</p>
-                <p className="flex items-center gap-2"><CalendarArrowDown size={16} className="text-text-muted shrink-0" />Dolazak: {transport?.datum_zavrsetka ?? '/'}</p>
+                <p className="flex items-center gap-2"><CalendarArrowUp size={16} className="text-text-muted shrink-0" />Polazak: {formatDatum(transport?.datum_polaska)}</p>
+                <p className="flex items-center gap-2"><CalendarArrowDown size={16} className="text-text-muted shrink-0" />Dolazak: {formatDatum(transport?.datum_zavrsetka)}</p>
                 <p className="flex items-center gap-2"><Activity size={16} className="text-text-muted shrink-0" />Status: {transport?.status}</p>
                 <p className="flex items-center gap-2"><StickyNote size={16} className="text-text-muted shrink-0" />Napomena: {transport?.napomena ?? '/'}</p>
             </div>

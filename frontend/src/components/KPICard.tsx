@@ -7,7 +7,7 @@ interface Trend {
 
 interface KPICardProps {
     title: string;
-    value: string;
+    value: number;
     icon: LucideIcon;
     trend?: Trend; 
 }

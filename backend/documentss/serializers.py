@@ -7,6 +7,28 @@ from warehouse.serializers import SkladisteSerializer
 from transport.serializers import TransportReadSerializer
 from inventory.serializers import ProizvodReadSerializer
 
+class StavkeDokumentaReadSerializer(serializers.ModelSerializer):
+    dokument = serializers.PrimaryKeyRelatedField(read_only=True)
+    proizvod = ProizvodReadSerializer()
+
+    class Meta:
+        model = StavkeDokumenta
+        fields = '__all__'
+
+
+class StavkeDokumentaWriteSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = StavkeDokumenta
+        fields = '__all__'
+
+    def validate(self, data):
+        if data.get('kolicina') <= 0:
+            raise serializers.ValidationError('Količina ne može biti manja ili jednaka 0')
+        
+        if data.get('cena') <= 0:
+            raise serializers.ValidationError('Cena ne može biti manja ili jednaka 0')
+        
+        return data
 
 class DokumentReadSerializer(serializers.ModelSerializer):
     poslovni_partner = PoslovniPartnerSerializer()
@@ -14,6 +36,7 @@ class DokumentReadSerializer(serializers.ModelSerializer):
     skladiste_ulaza = SkladisteSerializer()
     skladiste_izlaza = SkladisteSerializer()
     transport = TransportReadSerializer()
+    stavke = StavkeDokumentaReadSerializer(many=True, read_only=True)
 
     class Meta:
         model = Dokument
@@ -54,27 +77,3 @@ class DokumentWriteSerializer(serializers.ModelSerializer):
             obradi_dokument(instance)
         
         return super().update(instance, validated_data)
-
-
-class StavkeDokumentaReadSerializer(serializers.ModelSerializer):
-    dokument = serializers.PrimaryKeyRelatedField(read_only=True)
-    proizvod = ProizvodReadSerializer()
-
-    class Meta:
-        model = StavkeDokumenta
-        fields = '__all__'
-
-
-class StavkeDokumentaWriteSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = StavkeDokumenta
-        fields = '__all__'
-
-    def validate(self, data):
-        if data.get('kolicina') <= 0:
-            raise serializers.ValidationError('Količina ne može biti manja ili jednaka 0')
-        
-        if data.get('cena') <= 0:
-            raise serializers.ValidationError('Cena ne može biti manja ili jednaka 0')
-        
-        return data

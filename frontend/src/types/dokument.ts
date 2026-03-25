@@ -7,8 +7,8 @@ import type { Proizvod } from './inventar'
 export interface StavkaDokumenta {
     id: number
     proizvod: Proizvod
-    slot_ulaza: Slot
-    slot_izlaza: Slot
+    slot_ulaza: Slot | null
+    slot_izlaza: Slot | null
     kolicina: number
     cena: number
 }

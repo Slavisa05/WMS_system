@@ -1,5 +1,6 @@
 import { FileText } from "lucide-react";
 import { Link } from "react-router-dom";
+import { formatDatum } from "@/lib/utils";
 import type { Dokument } from "@/types/dokument";
 
 const statusStyles: Record<Dokument['status'], string> = {
@@ -18,7 +19,7 @@ const DocumentLogItem = ({ id, tip, status, datum_vreme, zaposleni, poslovni_par
 
                     <div className="flex flex-col gap-2">
                         <strong>{tip} #{id}</strong>
-                        <span className="text-sm text-text-muted">{zaposleni.ime} {zaposleni.prezime} · {datum_vreme}{poslovni_partner?.naziv ? ` · ${poslovni_partner?.naziv}` : ''}</span>
+                        <span className="text-sm text-text-muted">{zaposleni.ime} {zaposleni.prezime} · {formatDatum(datum_vreme)}{poslovni_partner?.naziv ? ` · ${poslovni_partner?.naziv}` : ''}</span>
                     </div>
                 </div>
                 <p className={`px-2.5 py-1 rounded-xl text-sm font-medium ${statusStyles[status]}`}>{status}</p>

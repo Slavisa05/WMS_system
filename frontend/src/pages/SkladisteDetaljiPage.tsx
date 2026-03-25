@@ -30,7 +30,7 @@ const SkladisteDetaljiPage = () => {
 
             <div className="flex flex-col gap-2 p-4 bg-sidebar text-sidebar-text rounded-xl">
                 <div className="flex flex-wrap gap-8 justify-between items-center w-full">
-                    <h2>Veleprodajno skladiste</h2>
+                    <h2>{skladiste?.naziv}</h2>
                     <div className="flex items-center gap-2 py-4 px-8 rounded-xl bg-sidebar">
                         <Button text='izmeni' />
                         <Button text='obriši' variant='secondary' />

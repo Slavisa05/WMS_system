@@ -1,5 +1,6 @@
 import { Truck } from "lucide-react";
 import { Link } from "react-router-dom";
+import { formatDatum } from "@/lib/utils";
 import type { Transport } from "@/types/transport";
 
 const statusStyles: Record<Transport['status'], string> = {
@@ -10,7 +11,7 @@ const statusStyles: Record<Transport['status'], string> = {
     'NEUSPESNO': 'bg-gray-100 text-gray-600',
 };
 
-const TransportLogItem = ({ id, vozilo, vozac, datum_polaska, datum_zavrsetka, status, napomena }: Transport) => {
+const TransportLogItem = ({ id, vozilo, vozac, datum_polaska, datum_zavrsetka, status }: Transport) => {
     return(
         <Link to={`/transporti/${id}`}>
             <div className="flex justify-between items-center w-full px-5 py-2.5 bg-sidebar text-sidebar-text rounded-xl transition-all ease-out duration-300 hover:transform-[translateY(-5px)] hover:bg-sidebar-hover">
@@ -19,7 +20,7 @@ const TransportLogItem = ({ id, vozilo, vozac, datum_polaska, datum_zavrsetka, s
 
                     <div className="flex flex-col gap-2">
                         <strong>{vozilo.registarski_broj} · {vozilo.model}</strong>
-                        <span className="text-sm text-text-muted">Vozač: {vozac?.ime} {vozac?.prezime} · {datum_polaska}{datum_zavrsetka ? ` · ${datum_zavrsetka}` : ''}</span>
+                        <span className="text-sm text-text-muted">Vozač: {vozac?.ime} {vozac?.prezime} · {formatDatum(datum_polaska)}{formatDatum(datum_zavrsetka) ? ` · ${formatDatum(datum_zavrsetka)}` : ''}</span>
                     </div>
                 </div>
                 <p className={`px-2.5 py-1 rounded-xl text-sm font-medium ${statusStyles[status]}`}>{status}</p>

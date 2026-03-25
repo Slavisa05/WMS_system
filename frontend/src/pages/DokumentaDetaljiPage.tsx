@@ -1,24 +1,17 @@
 import { Clock, Calendar, User, Building2, LogIn, LogOut, Truck } from "lucide-react"
+import { useParams } from "react-router-dom";
+import { formatDatum } from "@/lib/utils";
 import Header from "@/components/Header";
 import Button from "@/components/Button";
 import StavkeDokumenta from "@/components/StavkeDokumenta";
-
-interface StavkaDokumenta {
-    id: number;
-    proizvod: string;
-    slotUlaza: string;
-    slotIzlaza: string;
-    kolicina: number;
-    jedinicaMere: string;
-    cena: number;
-}
+import useDokument from "@/hooks/useDokument";
 
 const DokumentaDetaljiPage = () => {
-    const stavke: StavkaDokumenta[] = [
-        { id: 1, proizvod: 'Coca Cola 330ml', slotUlaza: 'Slot A1', slotIzlaza: '—', kolicina: 150, jedinicaMere: 'kom', cena: 50 },
-        { id: 2, proizvod: 'Pepsi 500ml', slotUlaza: 'Slot A2', slotIzlaza: '—', kolicina: 200, jedinicaMere: 'kom', cena: 45 },
-        { id: 3, proizvod: 'Pepsi 500ml', slotUlaza: 'Slot A2', slotIzlaza: '—', kolicina: 200, jedinicaMere: 'kom', cena: 45 },
-    ];
+    const { id } = useParams();
+    const { dokument, isLoading, error } = useDokument(Number(id));
+
+    if (isLoading) return 'Loading...';
+    if (error) return `Greska: ${error}`;    
 
     return(
         <section className="pr-[5%] flex flex-col gap-10">
@@ -26,30 +19,28 @@ const DokumentaDetaljiPage = () => {
 
             <div className="flex flex-col gap-2 p-4 bg-sidebar text-sidebar-text rounded-xl">
                 <div className="flex flex-wrap gap-8 justify-between items-center w-full">
-                    <h2>Prijemnica #1452</h2>
+                    <h2>{dokument?.tip} #{dokument?.id}</h2>
                     <div className="flex items-center gap-2 py-4 px-8 rounded-xl bg-sidebar">
                         <Button text='prihvati' />
                         <Button text='odbij' variant='secondary' />
                     </div>
                 </div>
 
-                <p className="flex items-center gap-2"><Clock size={16} className="text-text-muted shrink-0" />Status: NA CEKANJU</p>
-                <p className="flex items-center gap-2"><Calendar size={16} className="text-text-muted shrink-0" />Datum i Vreme: 17/03/2026 14:30h</p>
-                <p className="flex items-center gap-2"><User size={16} className="text-text-muted shrink-0" />Zaposleni: Marko Markovic</p>
-                <p className="flex items-center gap-2"><Building2 size={16} className="text-text-muted shrink-0" />Poslovni partner: IDEA</p>
-                <p className="flex items-center gap-2"><LogIn size={16} className="text-text-muted shrink-0" />Skladiste ulaza: Veleprodajno skladiste</p>
-                <p className="flex items-center gap-2"><LogOut size={16} className="text-text-muted shrink-0" />Skladiste izlaza: /</p>
-                <p className="flex items-center gap-2"><Truck size={16} className="text-text-muted shrink-0" />Transport: /</p>
+                <p className="flex items-center gap-2"><Clock size={16} className="text-text-muted shrink-0" />Status: {dokument?.status}</p>
+                <p className="flex items-center gap-2"><Calendar size={16} className="text-text-muted shrink-0" />Datum i Vreme: {formatDatum(dokument?.datum_vreme)}</p>
+                <p className="flex items-center gap-2"><User size={16} className="text-text-muted shrink-0" />Zaposleni: {dokument?.zaposleni.ime} {dokument?.zaposleni.prezime}</p>
+                <p className="flex items-center gap-2"><Building2 size={16} className="text-text-muted shrink-0" />Poslovni partner: {dokument?.poslovni_partner?.naziv ?? '/'}</p>
+                <p className="flex items-center gap-2"><LogIn size={16} className="text-text-muted shrink-0" />Skladiste ulaza: {dokument?.skladiste_ulaza?.naziv ?? '/'}</p>
+                <p className="flex items-center gap-2"><LogOut size={16} className="text-text-muted shrink-0" />Skladiste izlaza: {dokument?.skladiste_izlaza?.naziv ?? '/'}</p>
+                <p className="flex items-center gap-2"><Truck size={16} className="text-text-muted shrink-0" />ID Transporta: {dokument?.transport?.id ?? '/'}</p>
             </div>
 
             <div className="flex flex-col gap-2">
                 <h2>Stavke Dokumenta</h2>
                 <div className="flex flex-wrap gap-2">
-                    {stavke.map(s => {
-                        return(
-                            <StavkeDokumenta key={s.id} proizvod={s.proizvod} slotUlaza={s.slotUlaza} slotIzlaza={s.slotIzlaza} kolicina={s.kolicina} jedinicaMere={s.jedinicaMere} cena={s.cena} />
-                        );
-                    })}
+                    {dokument?.stavke?.map(s => (
+                        <StavkeDokumenta key={s.id} {...s} />
+                    ))}
                 </div>
             </div>
         </section>
