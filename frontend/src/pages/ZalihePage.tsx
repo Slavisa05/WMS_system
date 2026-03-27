@@ -11,7 +11,7 @@ const ZalihePage = () => {
     const [search, setSearch] = useState('');
     const [selectedProizvod, setSelectedProizvod] = useState('');
     const [selectedSlot, setSelectedSlot] = useState('');
-
+   
     if (isLoading) return 'Loading...';
     if (error) return `Greska: ${error}`;
 
@@ -38,7 +38,6 @@ const ZalihePage = () => {
                     { value: selectedProizvod, onChange: setSelectedProizvod, placeholder: 'Svi proizvodi', options: proizvodi_drop },
                     { value: selectedSlot, onChange: setSelectedSlot, placeholder: 'Svi slotovi', options: slot_drop },
                 ]}
-                action={<Button icon={Plus} text="Dodaj nove zalihe" />}
             />
 
             <div className="flex flex-wrap gap-4">

@@ -1,15 +1,33 @@
 import { useState } from "react";
 import { Plus } from "lucide-react";
+import { createProizvod } from "@/api/proizvod";
 import Header from "@/components/Header";
 import Button from "@/components/Button";
 import ProizvodCard from "@/components/ProizvodCard";
 import SearchBar from "@/components/SearchBar";
 import useProizvodi from "@/hooks/useProizvode";
+import Modal from "@/components/Modal";
+import ProizvodForm from "@/components/forms/ProizvodForm";
 
 const ProizvodiPage = () => {
-    const { proizvodi, isLoading, error } = useProizvodi()
+    const { proizvodi, isLoading, error, refetch } = useProizvodi()
     const [search, setSearch] = useState('')
     const [selectedKategorija, setSelectedKategorija] = useState('')
+    const [isAddOpen, setIsAddOpen] = useState(false)
+    const [isSubmitting, setIsSubmitting] = useState(false)
+
+    const handleAdd = async (data: { naziv: string, barkod: string, sifra: string, jedinica_mere: 'g' | 'kg' | 't' | 'ml' | 'l' | 'kol', kategorija: number }) => {
+        setIsSubmitting(true)
+        try {
+            await createProizvod(data)
+            setIsAddOpen(false)
+            refetch()
+        } catch {
+            alert('Greška pri dodavanju proizvoda')
+        } finally {
+            setIsSubmitting(false)
+        }
+    }
 
     if (isLoading) return 'Loading...';
     if (error) return `Greska: ${error}`;
@@ -33,7 +51,7 @@ const ProizvodiPage = () => {
                 filters={[
                     { value: selectedKategorija, onChange: setSelectedKategorija, placeholder: 'Sve kategorije', options: kategorije }
                 ]}
-                action={<Button icon={Plus} text="Dodaj proizvod" />}
+                action={<Button icon={Plus} text="Dodaj proizvod" onClick={() => setIsAddOpen(true)} />}
             />
              
             <div className="flex flex-wrap gap-4">
@@ -41,6 +59,14 @@ const ProizvodiPage = () => {
                     <ProizvodCard key={p.id} {...p} />
                 ))}
             </div>
+
+            <Modal isOpen={isAddOpen} title="Dodaj proizvod" onClose={() => setIsAddOpen(false)}>
+                <ProizvodForm 
+                    onSubmit={handleAdd}
+                    onCancel={() => setIsAddOpen(false)}
+                    isLoading={isSubmitting}
+                />
+            </Modal>
         </section>
     );
 }

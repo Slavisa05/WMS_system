@@ -1,15 +1,52 @@
 import { Barcode, Hash, Ruler, Tag, Package, Lock, PackageOpen } from "lucide-react"
-import { useParams } from "react-router-dom"
+import { useParams, useNavigate } from "react-router-dom"
+import { useState } from "react"
+import { updateProizvod, deleteProizvod } from "@/api/proizvod"
 import Header from "@/components/Header"
 import Button from "@/components/Button"
 import ZalihePoSlotovima from "@/components/ZalihePoSlotovima"
 import useProizvod from "@/hooks/useProizvod"
 import useZalihe from "@/hooks/useZalihe"
+import Modal from "@/components/Modal"
+import ConfirmModal from "@/components/ConfirmModal"
+import ProizvodForm from "@/components/forms/ProizvodForm"
 
 const ProizvodiDetaljiPage = () => {
     const { id } = useParams();
-    const { proizvod, isLoading, error } = useProizvod(Number(id));
+    const navigate = useNavigate();
+    const { proizvod, isLoading, error, refetch } = useProizvod(Number(id));
     const { zalihe } = useZalihe();
+
+    const [isEditOpen, setIsEditOpen] = useState(false)
+    const [isDeleteOpen, setIsDeleteOpen] = useState(false)
+    const [isSubmitting, setIsSubmitting] = useState(false)
+
+    const handleEdit = async (data: { naziv: string, barkod: string, sifra: string, jedinica_mere: 'g' | 'kg' | 't' | 'ml' | 'l' | 'kol', kategorija: number }) => {
+        if (!proizvod) return
+        setIsSubmitting(true)
+        try {
+            await updateProizvod(proizvod.id, data)
+            setIsEditOpen(false)
+            refetch()
+        } catch {
+            alert('Greška pri izmeni proizvoda')
+        } finally {
+            setIsSubmitting(false)
+        }
+    }
+
+    const handleDelete = async () => {
+        if (!proizvod) return
+        setIsSubmitting(true)
+        try {
+            await deleteProizvod(proizvod.id)
+            navigate(`/proizvodi`)     
+        } catch {
+            alert('Greška pri brisanju proizvoda')
+        } finally {
+            setIsSubmitting(false)
+        }
+    }
     
     if (isLoading) return 'Loading...';
     if (error) return `Greska: ${error}`;
@@ -28,8 +65,8 @@ const ProizvodiDetaljiPage = () => {
                 <div className="flex flex-wrap gap-8 justify-between items-center w-full">
                     <h2>{proizvod?.naziv}</h2>
                     <div className="flex items-center gap-2 py-4 px-8 rounded-xl bg-sidebar">
-                        <Button text='izmeni' />
-                        <Button text='obriši' variant='secondary' />
+                        <Button text='izmeni' onClick={() => setIsEditOpen(true)} />
+                        <Button text='obriši' variant='secondary' onClick={() => setIsDeleteOpen(true)} />
                     </div>
                 </div>
 
@@ -56,6 +93,25 @@ const ProizvodiDetaljiPage = () => {
                     <p className="flex items-center gap-2"><PackageOpen size={14} className="text-text-muted shrink-0" />Dostupno: {dostupno}</p>
                 </div>
             </div>
+
+            <Modal isOpen={isEditOpen} title="Izmeni proizvod" onClose={() => setIsEditOpen(false)}>
+                <ProizvodForm
+                    initialData={proizvod}
+                    onSubmit={handleEdit}
+                    onCancel={() => setIsEditOpen(false)}
+                    isLoading={isSubmitting}
+                />
+            </Modal>
+
+            {/* Modal za brisanje */}
+            <ConfirmModal
+                isOpen={isDeleteOpen}
+                title="Izbriši proizvod"
+                message={`Da li ste sigurni da želite da izbrišete proizvod "${proizvod?.naziv}"?`}
+                onConfirm={handleDelete}
+                onCancel={() => setIsDeleteOpen(false)}
+                isLoading={isSubmitting}
+            />
         </section>
     );
 }

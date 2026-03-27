@@ -93,7 +93,7 @@ const PartneriDetaljiPage = () => {
             {/* Modal za brisanje */}
             <ConfirmModal
                 isOpen={isDeleteOpen}
-                title="Izbriši kategoriju"
+                title="Izbriši partnera"
                 message={`Da li ste sigurni da želite da izbrišete partnera "${partner?.naziv}"?`}
                 onConfirm={handleDelete}
                 onCancel={() => setIsDeleteOpen(false)}

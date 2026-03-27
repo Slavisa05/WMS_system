@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { getSkladista } from "@/api/skladiste";
 import type { Skladiste } from "@/types/skladiste";
 
@@ -12,7 +12,8 @@ const useSkladista = () => {
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
 
-    useEffect(() => {
+    const fetchData = useCallback(() => {
+        setIsLoading(true)
         getSkladista()
             .then(res => {
                 const data = res.data as PaginatedResponse<Skladiste> | Skladiste[];
@@ -20,9 +21,13 @@ const useSkladista = () => {
             })
             .catch(() => setError('Greska pri ucitavanju skladista.'))
             .finally(() => setIsLoading(false))
-    }, []);
+    }, [])
 
-    return { skladista, isLoading, error }
+    useEffect(() => {
+        fetchData()
+    }, [fetchData]);
+
+    return { skladista, isLoading, error, refetch: fetchData }
 }
 
 export default useSkladista

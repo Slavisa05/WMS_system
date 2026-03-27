@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { getProizvodi } from "@/api/proizvod";
 import type { Proizvod } from "@/types/inventar";
 
@@ -12,7 +12,8 @@ const useProizvodi = () => {
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
 
-    useEffect(() => {
+    const fetchData = useCallback(() => {
+        setIsLoading(true)
         getProizvodi()
             .then(res => {
                 const data = res.data as PaginatedResponse<Proizvod> | Proizvod[];
@@ -20,9 +21,13 @@ const useProizvodi = () => {
             })
             .catch(() => setError('Greska pri ucitavanju proizvoda.'))
             .finally(() => setIsLoading(false))
-    }, []);
+    }, [])
 
-    return { proizvodi, isLoading, error }
+    useEffect(() => {
+        fetchData()
+    }, [fetchData]);
+
+    return { proizvodi, isLoading, error, refetch: fetchData }
 }
 
 export default useProizvodi

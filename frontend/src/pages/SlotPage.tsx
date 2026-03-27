@@ -1,12 +1,49 @@
 import { Boxes, LayoutGrid, Warehouse, PackageCheck, PackageOpen } from "lucide-react";
-import { useParams } from "react-router-dom";
+import { useState } from "react";
+import { useParams, useNavigate } from "react-router-dom";
+import { updateSlot, deleteSlot } from "@/api/slot";
 import Header from "@/components/Header";
 import Button from "@/components/Button";
 import useSlot from "@/hooks/useSlot";
+import Modal from "@/components/Modal";
+import ConfirmModal from "@/components/ConfirmModal";
+import SlotForm from "@/components/forms/SlotForm";
 
 const SlotPage = () => {
     const { id } = useParams();
-    const { slot, isLoading, error } = useSlot(Number(id));
+    const navigate = useNavigate();
+    const { slot, isLoading, error, refetch } = useSlot(Number(id));
+
+    const [isEditOpen, setIsEditOpen] = useState(false)
+    const [isDeleteOpen, setIsDeleteOpen] = useState(false)
+    const [isSubmitting, setIsSubmitting] = useState(false)
+
+    const handleEdit = async (data: { naziv: string, kapacitet: number }) => {
+        if (!slot) return
+        setIsSubmitting(true)
+        try {
+            await updateSlot(slot.id, data)
+            setIsEditOpen(false)
+            refetch()
+        } catch {
+            alert('Greška pri izmeni slota')
+        } finally {
+            setIsSubmitting(false)
+        }
+    }
+
+    const handleDelete = async () => {
+        if (!slot) return
+        setIsSubmitting(true)
+        try {
+            await deleteSlot(slot.id)
+            navigate(`/sektori/${slot.sektor.id}`)     
+        } catch {
+            alert('Greška pri brisanju slota')
+        } finally {
+            setIsSubmitting(false)
+        }
+    }
 
     if (isLoading) return 'Loading...';
     if (error) return `Greska: ${error}`;
@@ -19,10 +56,10 @@ const SlotPage = () => {
 
             <div className="flex flex-col gap-2 p-4 bg-sidebar text-sidebar-text rounded-xl">
                 <div className="flex flex-wrap gap-8 justify-between items-center w-full">
-                    <h2>Slot 1</h2>
+                    <h2>{slot?.naziv}</h2>
                     <div className="flex items-center gap-2 py-4 px-8 rounded-xl bg-sidebar">
-                        <Button text='izmeni' />
-                        <Button text='obriši' variant='secondary' />
+                        <Button text='izmeni' onClick={() => setIsEditOpen(true)} />
+                        <Button text='obriši' variant='secondary' onClick={() => setIsDeleteOpen(true)} />
                     </div>
                 </div>
                 <p className="flex items-center gap-2"><LayoutGrid size={16} className="text-text-muted shrink-0" />Sektor: {slot?.sektor.naziv}</p>
@@ -47,6 +84,25 @@ const SlotPage = () => {
                     </div>
                 </div>
             </div>
+
+            <Modal isOpen={isEditOpen} title="Izmeni slot" onClose={() => setIsEditOpen(false)}>
+                <SlotForm
+                    initialData={slot}
+                    onSubmit={handleEdit}
+                    onCancel={() => setIsEditOpen(false)}
+                    isLoading={isSubmitting}
+                />
+            </Modal>
+
+            {/* Modal za brisanje */}
+            <ConfirmModal
+                isOpen={isDeleteOpen}
+                title="Izbriši slot"
+                message={`Da li ste sigurni da želite da izbrišete slot "${slot?.naziv}"?`}
+                onConfirm={handleDelete}
+                onCancel={() => setIsDeleteOpen(false)}
+                isLoading={isSubmitting}
+            />
         </section>
     );
 }

@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { getSlotovi } from "@/api/slot";
 import type { Slot } from "@/types/skladiste";
 
@@ -12,7 +12,8 @@ const useSlotovi = () => {
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
 
-    useEffect(() => {
+    const fetchData = useCallback(() => {
+        setIsLoading(true)
         getSlotovi()
             .then(res => {
                 const data = res.data as PaginatedResponse<Slot> | Slot[];
@@ -20,9 +21,13 @@ const useSlotovi = () => {
             })
             .catch(() => setError('Greska pri ucitavanju slotova.'))
             .finally(() => setIsLoading(false))
-    }, []);
+    }, [])
 
-    return { slotovi, isLoading, error }
+    useEffect(() => {
+        fetchData()
+    }, [fetchData]);
+
+    return { slotovi, isLoading, error, refetch: fetchData }
 }
 
 export default useSlotovi

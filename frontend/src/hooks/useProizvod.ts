@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { getProizvod } from "@/api/proizvod";
 import type { Proizvod } from "@/types/inventar";
 
@@ -7,14 +7,19 @@ const useProizvod = (id: number) => {
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
 
-    useEffect(() => {
+    const fetchData = useCallback(() => {       
+        setIsLoading(true)
         getProizvod(id)
             .then(res => setProizvod(res.data))
             .catch(() => setError('Greska pri ucitavanju proizvoda.'))
             .finally(() => setIsLoading(false))
-    }, [id]);
+    }, [id])
 
-    return { proizvod, isLoading, error }
+    useEffect(() => {
+        fetchData()                             
+    }, [fetchData]);
+
+    return { proizvod, isLoading, error, refetch: fetchData }
 }
 
 export default useProizvod

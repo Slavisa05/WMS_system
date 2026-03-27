@@ -20,7 +20,7 @@ class VoziloViewSet(SoftDeleteMixin, viewsets.ModelViewSet):
     
 
 class TransportViewSet(SoftDeleteMixin, viewsets.ModelViewSet):
-    queryset = Transport.objects.filter(is_active=True).select_related('vozilo', 'vozilo__zaduzeni_vozac', 'vozac', 'vozac__pozicija')
+    queryset = Transport.objects.filter(is_active=True).select_related('vozilo', 'vozilo__zaduzeni_vozac', 'vozac', 'vozac__pozicija').order_by('-datum_polaska')
     permission_classes = [IsZaposlen]
 
     def get_serializer_class(self):

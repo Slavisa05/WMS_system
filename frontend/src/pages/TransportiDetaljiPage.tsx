@@ -1,16 +1,37 @@
 import { Truck, User, CalendarArrowUp, CalendarArrowDown, Activity, StickyNote } from "lucide-react";
 import { useParams } from "react-router-dom";
+import { useState } from "react";
+import { updateTransport } from "@/api/transport";
 import { formatDatum } from "@/lib/utils";
 import Header from "@/components/Header";
 import Button from "@/components/Button";
 import DocumentLogItem from "@/components/DocumentLogItem";
 import useTransport from "@/hooks/useTransport";
 import useDokumenta from "@/hooks/useDokumenta";
+import Modal from "@/components/Modal";
+import TransportForm from "@/components/forms/TransportForm";
 
 const TransportiDetaljiPage = () => {
     const { id } = useParams();
-    const { transport, isLoading, error } = useTransport(Number(id));
+    const { transport, isLoading, error, refetch } = useTransport(Number(id));
     const { dokumenta } = useDokumenta();
+
+    const [isEditOpen, setIsEditOpen] = useState(false)
+    const [isSubmitting, setIsSubmitting] = useState(false)
+
+    const handleEdit = async (data: { vozac: number, vozilo: number, datum_polaska: string, datum_zavrsetka: string | null, status: 'ZAKAZANO' | 'U_TOKU' | 'ZAVRSENO' | 'OTKAZANO' | 'NEUSPESNO', napomena: string | null }) => {
+        if (!transport) return
+        setIsSubmitting(true)
+        try {
+            await updateTransport(transport.id, data)
+            setIsEditOpen(false)
+            refetch()
+        } catch {
+            alert('Greška pri izmeni transporta')
+        } finally {
+            setIsSubmitting(false)
+        }
+    }
 
     if (isLoading) return 'Loading...';
     if (error) return `Greska: ${error}`;
@@ -25,8 +46,7 @@ const TransportiDetaljiPage = () => {
                 <div className="flex flex-wrap gap-8 justify-between items-center w-full">
                     <h2>Transport #{transport?.id}</h2>
                     <div className="flex items-center gap-2 py-4 px-8 rounded-xl bg-sidebar">
-                        <Button text='izmeni' />
-                        <Button text='obriši' variant='secondary' />
+                        <Button text='izmeni' onClick={() => setIsEditOpen(true)} />
                     </div>
                 </div>
 
@@ -46,6 +66,15 @@ const TransportiDetaljiPage = () => {
                     ))}
                 </div>
             </div>
+
+            <Modal isOpen={isEditOpen} title="Izmeni transport" onClose={() => setIsEditOpen(false)}>
+                <TransportForm
+                    initialData={transport}
+                    onSubmit={handleEdit}
+                    onCancel={() => setIsEditOpen(false)}
+                    isLoading={isSubmitting}
+                />
+            </Modal>
         </section>
     );
 }

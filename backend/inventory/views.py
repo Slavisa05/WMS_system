@@ -17,7 +17,7 @@ class KategorijaViewSet(SoftDeleteMixin, viewsets.ModelViewSet):
 
 
 class ProizvodViewSet(SoftDeleteMixin, viewsets.ModelViewSet):
-    queryset = Proizvod.objects.select_related('kategorija')
+    queryset = Proizvod.objects.filter(is_active=True).select_related('kategorija')
     filterset_fields = ['kategorija']
     filter_backends = [DjangoFilterBackend, SearchFilter]
     filterset_fields = ['kategorija']

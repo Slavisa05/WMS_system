@@ -9,11 +9,11 @@ export const getTransport = (id: number) => {
     return api.get<Transport>(`/transport/transporti/${id}/`);
 }
 
-export const createTransport = (data: Partial<Transport>) => {
+export const createTransport = (data: { vozac: number, vozilo: number, datum_polaska: string, datum_zavrsetka: string | null, status: 'ZAKAZANO' | 'U_TOKU' | 'ZAVRSENO' | 'OTKAZANO' | 'NEUSPESNO', napomena: string | null }) => {
     return api.post<Transport>(`/transport/transporti/`, data);
 }
 
-export const updateTransport = (id: number, data: Partial<Transport>) => {
+export const updateTransport = (id: number, data: { vozac: number, vozilo: number, datum_polaska: string, datum_zavrsetka: string | null, status: 'ZAKAZANO' | 'U_TOKU' | 'ZAVRSENO' | 'OTKAZANO' | 'NEUSPESNO', napomena: string | null }) => {
     return api.put<Transport>(`/transport/transporti/${id}/`, data);
 }
 

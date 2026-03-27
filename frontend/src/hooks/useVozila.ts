@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { getVozila } from "@/api/vozilo";
 import type { Vozilo } from "@/types/transport";
 
@@ -12,7 +12,8 @@ const useVozila = () => {
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
 
-    useEffect(() => {
+    const fetchData = useCallback(() => {
+        setIsLoading(true)
         getVozila()
             .then(res => {
                 const data = res.data as PaginatedResponse<Vozilo> | Vozilo[];
@@ -20,9 +21,13 @@ const useVozila = () => {
             })
             .catch(() => setError('Greska pri ucitavanju vozila.'))
             .finally(() => setIsLoading(false))
-    }, []);
+    }, [])
 
-    return { vozila, isLoading, error }
+    useEffect(() => {
+        fetchData()
+    }, [fetchData]);
+
+    return { vozila, isLoading, error, refetch: fetchData }
 }
 
 export default useVozila

@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { getZalihe } from "@/api/zalihe";
 import type { Zalihe } from "@/types/inventar";
 
@@ -12,7 +12,8 @@ const useZalihe = () => {
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
 
-    useEffect(() => {
+    const fetchData = useCallback(() => {
+        setIsLoading(true)
         getZalihe()
             .then(res => {
                 const data = res.data as PaginatedResponse<Zalihe> | Zalihe[];
@@ -20,9 +21,13 @@ const useZalihe = () => {
             })
             .catch(() => setError('Greska pri ucitavanju zaliha.'))
             .finally(() => setIsLoading(false))
-    }, []);
+    }, [])
 
-    return { zalihe, isLoading, error }
+    useEffect(() => {
+        fetchData()
+    }, [fetchData]);
+
+    return { zalihe, isLoading, error, refetch: fetchData }
 }
 
 export default useZalihe

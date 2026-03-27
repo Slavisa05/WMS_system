@@ -1,15 +1,71 @@
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import { Plus, Warehouse, Boxes, PackageCheck, PackageOpen } from "lucide-react";
+import { useState } from "react";
+import { updateSektor, deleteSektor } from "@/api/sektor";
+import { createSlot } from "@/api/slot";
 import Header from "@/components/Header";
 import Button from "@/components/Button";
 import SlotCard from "@/components/SlotCard";
 import useSektor from "@/hooks/useSektor";
 import useSlotovi from "@/hooks/useSlotovi";
+import Modal from "@/components/Modal";
+import ConfirmModal from "@/components/ConfirmModal";
+import SektorForm from "@/components/forms/SektorForm";
+import SlotForm from "@/components/forms/SlotForm";
 
 const SektorPage = () => {
     const { id } = useParams();
-    const { sektor, isLoading, error } = useSektor(Number(id));
-    const { slotovi } = useSlotovi();
+    const navigate = useNavigate();
+    const { sektor, isLoading, error, refetch } = useSektor(Number(id));
+    const { slotovi, refetch: refetchSlotove } = useSlotovi();
+
+    const [isEditOpen, setIsEditOpen] = useState(false)
+    const [isDeleteOpen, setIsDeleteOpen] = useState(false)
+    const [isSubmitting, setIsSubmitting] = useState(false)
+
+    const handleEdit = async (data: { naziv: string }) => {
+        if (!sektor) return
+        setIsSubmitting(true)
+        try {
+            await updateSektor(sektor.id, data)
+            setIsEditOpen(false)
+            refetch()
+        } catch {
+            alert('Greška pri izmeni sektora')
+        } finally {
+            setIsSubmitting(false)
+        }
+    }
+
+    const handleDelete = async () => {
+        if (!sektor) return
+        setIsSubmitting(true)
+        try {
+            await deleteSektor(sektor.id)
+            navigate(`/skladista/${sektor.skladiste.id}`)     
+        } catch {
+            alert('Greška pri brisanju sektora')
+        } finally {
+            setIsSubmitting(false)
+        }
+    }
+
+    // DODAVANJE SLOTA
+    const [isAddSlotOpen, setIsAddSlotOpen] = useState(false)
+    const [isSubmittingSlot, setIsSubmittingSlot] = useState(false)
+
+    const handleAdd = async (data: { naziv: string, kapacitet: number }) => {
+        setIsSubmittingSlot(true)
+        try {
+            await createSlot({ ...data, sektor: sektor!.id })
+            setIsAddSlotOpen(false)
+            refetchSlotove()
+        } catch {
+            alert('Greška pri dodavanju sektora')
+        } finally {
+            setIsSubmittingSlot(false)
+        }
+    }
 
     if (isLoading) return 'Loading...';
     if (error) return `Greska: ${error}`;
@@ -29,8 +85,8 @@ const SektorPage = () => {
                 <div className="flex flex-wrap gap-8 justify-between items-center w-full">
                     <h2>{sektor?.naziv}</h2>
                     <div className="flex items-center gap-2 py-4 px-8 rounded-xl bg-sidebar">
-                        <Button text='izmeni' />
-                        <Button text='obriši' variant='secondary' />
+                        <Button text='izmeni' onClick={() => setIsEditOpen(true)} />
+                        <Button text='obriši' variant='secondary' onClick={() => setIsDeleteOpen(true)} />
                     </div>
                 </div>
 
@@ -60,7 +116,7 @@ const SektorPage = () => {
                 <div className="flex flex-wrap gap-8 items-center justify-between w-full">
                     <h2>Slotovi</h2> 
                     <div className="flex items-center gap-2 px-8 py-4 rounded-xl bg-sidebar">
-                        <Button icon={Plus} text='dodaj sektor' />
+                        <Button icon={Plus} text='dodaj slot' onClick={() => setIsAddSlotOpen(true)} />
                     </div>
                 </div>
 
@@ -70,6 +126,33 @@ const SektorPage = () => {
                     ))}
                 </div>
             </div>
+
+            <Modal isOpen={isEditOpen} title="Izmeni sektor" onClose={() => setIsEditOpen(false)}>
+                <SektorForm
+                    initialData={sektor}
+                    onSubmit={handleEdit}
+                    onCancel={() => setIsEditOpen(false)}
+                    isLoading={isSubmitting}
+                />
+            </Modal>
+
+            {/* Modal za brisanje */}
+            <ConfirmModal
+                isOpen={isDeleteOpen}
+                title="Izbriši sektor"
+                message={`Da li ste sigurni da želite da izbrišete sektor "${sektor?.naziv}"?`}
+                onConfirm={handleDelete}
+                onCancel={() => setIsDeleteOpen(false)}
+                isLoading={isSubmitting}
+            />
+
+            <Modal isOpen={isAddSlotOpen} title="Dodaj slot" onClose={() => setIsAddSlotOpen(false)}>
+                <SlotForm 
+                    onSubmit={handleAdd}
+                    onCancel={() => setIsAddSlotOpen(false)}
+                    isLoading={isSubmittingSlot}
+                />
+            </Modal>
         </section>
     );
 }

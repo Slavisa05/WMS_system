@@ -9,7 +9,7 @@ export const getZaliha = (id: number) => {
     return api.get<Zalihe>(`/inventory/zalihe/${id}/`);
 }
 
-export const createZaliha = (data: Partial<Zalihe>) => {
+export const createZaliha = (data: { kolicina: number, slot: number, proizvod: number }) => {
     return api.post<Zalihe>(`/inventory/zalihe/`, data);
 }
 

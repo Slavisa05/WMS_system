@@ -1,17 +1,73 @@
-import { useParams } from 'react-router-dom'
+import { useParams, useNavigate } from 'react-router-dom'
 import { Plus, MapPin, Tag, Boxes, PackageCheck, PackageOpen, Phone } from "lucide-react";
+import { useState } from 'react';
+import { updateSkladiste, deleteSkladiste } from '@/api/skladiste';
+import { createSektor } from '@/api/sektor';
 import Header from '@/components/Header'
 import Button from '@/components/Button'
 import SektorCard from '@/components/SektorCard'
 import useSkladiste from '@/hooks/useSkladiste';
 import useSektore from '@/hooks/useSektore';
 import useSlotovi from '@/hooks/useSlotovi';
+import Modal from '@/components/Modal';
+import ConfirmModal from '@/components/ConfirmModal';
+import SkladisteForm from '@/components/forms/SkladisteForm';
+import SektorForm from '@/components/forms/SektorForm';
 
 const SkladisteDetaljiPage = () => {
     const { id } = useParams();
-    const { skladiste, isLoading, error } = useSkladiste(Number(id));
-    const { sektori } = useSektore();
+    const navigate = useNavigate()
+    const { skladiste, isLoading, error, refetch } = useSkladiste(Number(id));
+    const { sektori, refetch: refetchSektore } = useSektore();
     const { slotovi } = useSlotovi();
+
+    const [isEditOpen, setIsEditOpen] = useState(false)
+    const [isDeleteOpen, setIsDeleteOpen] = useState(false)
+    const [isSubmitting, setIsSubmitting] = useState(false)
+
+    const handleEdit = async (data: { naziv: string }) => {
+        if (!skladiste) return
+        setIsSubmitting(true)
+        try {
+            await updateSkladiste(skladiste.id, data)
+            setIsEditOpen(false)
+            refetch()
+        } catch {
+            alert('Greška pri izmeni partnera')
+        } finally {
+            setIsSubmitting(false)
+        }
+    }
+
+    const handleDelete = async () => {
+        if (!skladiste) return
+        setIsSubmitting(true)
+        try {
+            await deleteSkladiste(skladiste.id)
+            navigate('/skladista')     
+        } catch {
+            alert('Greška pri brisanju partnera')
+        } finally {
+            setIsSubmitting(false)
+        }
+    }
+
+    // DODAVANJE SEKTORA
+    const [isAddSektorOpen, setIsAddSektorOpen] = useState(false)
+    const [isSubmittingSektor, setIsSubmittingSektor] = useState(false)
+
+    const handleAdd = async (data: { naziv: string }) => {
+        setIsSubmittingSektor(true)
+        try {
+            await createSektor({ ...data, skladiste: skladiste!.id })
+            setIsAddSektorOpen(false)
+            refetchSektore()
+        } catch {
+            alert('Greška pri dodavanju sektora')
+        } finally {
+            setIsSubmittingSektor(false)
+        }
+    }
 
     if (isLoading) return 'Loading...';
     if (error) return `Greska: ${error}`;
@@ -32,8 +88,8 @@ const SkladisteDetaljiPage = () => {
                 <div className="flex flex-wrap gap-8 justify-between items-center w-full">
                     <h2>{skladiste?.naziv}</h2>
                     <div className="flex items-center gap-2 py-4 px-8 rounded-xl bg-sidebar">
-                        <Button text='izmeni' />
-                        <Button text='obriši' variant='secondary' />
+                        <Button text='izmeni' onClick={() => setIsEditOpen(true)} />
+                        <Button text='obriši' variant='secondary' onClick={() => setIsDeleteOpen(true)} />
                     </div>
                 </div>
 
@@ -65,7 +121,7 @@ const SkladisteDetaljiPage = () => {
                 <div className="flex flex-wrap gap-8 items-center justify-between w-full">
                     <h2>Sektori</h2> 
                     <div className="flex items-center gap-2 px-8 py-4 rounded-xl bg-sidebar">
-                        <Button icon={Plus} text='dodaj sektor' />
+                        <Button icon={Plus} text='dodaj sektor' onClick={() => setIsAddSektorOpen(true)} />
                     </div>
                 </div>
 
@@ -75,6 +131,33 @@ const SkladisteDetaljiPage = () => {
                     ))}
                 </div>
             </div>
+
+            <Modal isOpen={isEditOpen} title="Izmeni skladiste" onClose={() => setIsEditOpen(false)}>
+                <SkladisteForm
+                    initialData={skladiste}
+                    onSubmit={handleEdit}
+                    onCancel={() => setIsEditOpen(false)}
+                    isLoading={isSubmitting}
+                />
+            </Modal>
+
+            {/* Modal za brisanje */}
+            <ConfirmModal
+                isOpen={isDeleteOpen}
+                title="Izbriši skladiste"
+                message={`Da li ste sigurni da želite da izbrišete skladiste "${skladiste?.naziv}"?`}
+                onConfirm={handleDelete}
+                onCancel={() => setIsDeleteOpen(false)}
+                isLoading={isSubmitting}
+            />
+
+            <Modal isOpen={isAddSektorOpen} title="Dodaj sektor" onClose={() => setIsAddSektorOpen(false)}>
+                <SektorForm 
+                    onSubmit={handleAdd}
+                    onCancel={() => setIsAddSektorOpen(false)}
+                    isLoading={isSubmittingSektor}
+                />
+            </Modal>
         </section>
     )
 }

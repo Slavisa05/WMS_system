@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { getTransporti } from "@/api/transport";
 import type { Transport } from "@/types/transport";
 
@@ -12,7 +12,8 @@ const useTransporti = () => {
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
 
-    useEffect(() => {
+    const fetchData = useCallback(() => {       
+        setIsLoading(true)
         getTransporti()
             .then(res => {
                 const data = res.data as PaginatedResponse<Transport> | Transport[];
@@ -20,9 +21,13 @@ const useTransporti = () => {
             })
             .catch(() => setError('Greska pri ucitavanju transporta.'))
             .finally(() => setIsLoading(false))
-    }, []);
+    }, [])
 
-    return { transporti, isLoading, error }
+    useEffect(() => {
+        fetchData()                             
+    }, [fetchData]);
+
+    return { transporti, isLoading, error, refetch: fetchData }
 }
 
 export default useTransporti

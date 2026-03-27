@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { getSektore } from "@/api/sektor";
 import type { Sektor } from "@/types/skladiste";
 
@@ -12,7 +12,8 @@ const useSektore = () => {
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
 
-    useEffect(() => {
+    const fetchData = useCallback(() => {
+        setIsLoading(true)
         getSektore()
             .then(res => {
                 const data = res.data as PaginatedResponse<Sektor> | Sektor[];
@@ -20,9 +21,13 @@ const useSektore = () => {
             })
             .catch(() => setError('Greska pri ucitavanju sektora.'))
             .finally(() => setIsLoading(false))
-    }, []);
+    }, [])
 
-    return { sektori, isLoading, error }
+    useEffect(() => {
+        fetchData()
+    }, [fetchData]);
+
+    return { sektori, isLoading, error, refetch: fetchData }
 }
 
 export default useSektore

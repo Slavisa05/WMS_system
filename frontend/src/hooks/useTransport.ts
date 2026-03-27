@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { getTransport } from "@/api/transport";
 import type { Transport } from "@/types/transport";
 
@@ -7,14 +7,19 @@ const useTransport = (id: number) => {
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
 
-    useEffect(() => {
+    const fetchData = useCallback(() => {       
+        setIsLoading(true)
         getTransport(id)
             .then(res => setTransport(res.data))
             .catch(() => setError('Greska pri ucitavanju transporta.'))
             .finally(() => setIsLoading(false))
-    }, [id]);
+    }, [id])
 
-    return { transport, isLoading, error }
+    useEffect(() => {
+        fetchData()                             
+    }, [fetchData]);
+
+    return { transport, isLoading, error, refetch: fetchData }
 }
 
 export default useTransport

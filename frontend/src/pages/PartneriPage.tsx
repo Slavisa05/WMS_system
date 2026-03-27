@@ -17,17 +17,17 @@ const PartneriPage = () => {
     const [isSubmitting, setIsSubmitting] = useState(false)
 
     const handleAdd = async (data: { naziv: string, pib: string, email: string, adresa: string, telefon: string, tip: 'D' | 'K' }) => {
-            setIsSubmitting(true)
-            try {
-                await createPartner(data)
-                setIsAddOpen(false)
-                refetch()
-            } catch {
-                alert('Greška pri dodavanju partnera')
-            } finally {
-                setIsSubmitting(false)
-            }
+        setIsSubmitting(true)
+        try {
+            await createPartner(data)
+            setIsAddOpen(false)
+            refetch()
+        } catch {
+            alert('Greška pri dodavanju partnera')
+        } finally {
+            setIsSubmitting(false)
         }
+    }
 
     if (isLoading) return 'Loading...';
     if (error) return `Greska: ${error}`;

@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { getVozilo } from "@/api/vozilo";
 import type { Vozilo } from "@/types/transport";
 
@@ -7,14 +7,19 @@ const useVozilo = (id: number) => {
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
 
-    useEffect(() => {
+    const fetchData = useCallback(() => {       
+        setIsLoading(true)
         getVozilo(id)
             .then(res => setVozilo(res.data))
             .catch(() => setError('Greska pri ucitavanju vozila.'))
             .finally(() => setIsLoading(false))
-    }, [id]);
+    }, [id])
 
-    return { vozilo, isLoading, error }
+    useEffect(() => {
+        fetchData()                             
+    }, [fetchData]);
+
+    return { vozilo, isLoading, error, refetch: fetchData }
 }
 
 export default useVozilo

@@ -9,12 +9,12 @@ export const getProizvod = (id: number) => {
     return api.get<Proizvod>(`/inventory/proizvodi/${id}/`);
 }
 
-export const createProizvod = (data: Partial<Proizvod>) => {
+export const createProizvod = (data: { naziv: string, barkod: string, sifra: string, jedinica_mere: 'g' | 'kg' | 't' | 'ml' | 'l' | 'kol', kategorija: number }) => {
     return api.post<Proizvod>(`/inventory/proizvodi/`, data);
 }
 
-export const updateProizvod = (id: number, data: Partial<Proizvod>) => {
-    return api.put<Proizvod>(`/inventory/proivodi/${id}/`, data);
+export const updateProizvod = (id: number, data: { naziv: string, barkod: string, sifra: string, jedinica_mere: 'g' | 'kg' | 't' | 'ml' | 'l' | 'kol', kategorija: number }) => {
+    return api.patch<Proizvod>(`/inventory/proizvodi/${id}/`, data);
 }
 
 export const deleteProizvod = (id: number) => {

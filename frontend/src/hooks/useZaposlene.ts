@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { getZaposlene } from "@/api/zaposleni";
 import type { Zaposleni } from "@/types/zaposleni";
 
@@ -12,7 +12,8 @@ const useZaposlene = () => {
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
 
-    useEffect(() => {
+    const fetchData = useCallback(() => {
+        setIsLoading(true)
         getZaposlene()
             .then(res => {
                 const data = res.data as PaginatedResponse<Zaposleni> | Zaposleni[];
@@ -20,9 +21,13 @@ const useZaposlene = () => {
             })
             .catch(() => setError('Greska pri ucitavanju zaposlenih.'))
             .finally(() => setIsLoading(false))
-    }, []);
+    }, [])
 
-    return { zaposlene, isLoading, error }
+    useEffect(() => {
+        fetchData()
+    }, [fetchData]);
+
+    return { zaposlene, isLoading, error, refetch: fetchData }
 }
 
 export default useZaposlene
