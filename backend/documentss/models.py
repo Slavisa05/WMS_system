@@ -67,8 +67,8 @@ class Dokument(BaseModel):
 class StavkeDokumenta(BaseModel):
     dokument = models.ForeignKey(Dokument, blank=False, null=False, on_delete=models.CASCADE, related_name='stavke')
     proizvod = models.ForeignKey(Proizvod, blank=False, null=False, on_delete=models.PROTECT)
-    slot_ulaza = models.ForeignKey(Slot, blank=False, null=False, on_delete=models.PROTECT, related_name='stavke_ulaza')
-    slot_izlaza = models.ForeignKey(Slot, blank=False, null=False, on_delete=models.PROTECT, related_name='stavke_izlaza')
+    slot_ulaza = models.ForeignKey(Slot, blank=True, null=True, on_delete=models.PROTECT, related_name='stavke_ulaza')
+    slot_izlaza = models.ForeignKey(Slot, blank=True, null=True, on_delete=models.PROTECT, related_name='stavke_izlaza')
     kolicina = models.DecimalField(max_digits=10, decimal_places=2)
     cena = models.DecimalField(max_digits=10, decimal_places=2)
 

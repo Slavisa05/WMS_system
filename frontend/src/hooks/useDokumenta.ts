@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { getDokumenta } from "@/api/dokument";
 import type { Dokument } from "@/types/dokument";
 
@@ -12,7 +12,8 @@ const useDokumenta = () => {
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
 
-    useEffect(() => {
+    const fetchData = useCallback(() => {       
+        setIsLoading(true)
         getDokumenta()
             .then(res => {
                 const data = res.data as PaginatedResponse<Dokument> | Dokument[];
@@ -20,9 +21,13 @@ const useDokumenta = () => {
             })
             .catch(() => setError('Greska pri ucitavanju dokumenata.'))
             .finally(() => setIsLoading(false))
-    }, []);
+    }, [])
 
-    return { dokumenta, isLoading, error }
+    useEffect(() => {
+        fetchData()                             
+    }, [fetchData]);
+
+    return { dokumenta, isLoading, error, refetch: fetchData }
 }
 
 export default useDokumenta

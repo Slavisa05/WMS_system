@@ -52,8 +52,7 @@ const TransportForm = ({ onSubmit, onCancel, initialData, isLoading }: Transport
         }
     }, [initialData])
 
-    const handleSubmit = (e: React.FormEvent) => {
-        e.preventDefault()
+    const handleSubmit = () => {
         if (vozacId === '' || voziloId === '') return
         onSubmit({
             vozac: vozacId, vozilo: voziloId, datum_polaska: datumPolaska, datum_zavrsetka: datumZavrsetka, status, napomena
@@ -61,7 +60,7 @@ const TransportForm = ({ onSubmit, onCancel, initialData, isLoading }: Transport
     }
 
     return (
-        <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+        <div className="flex flex-col gap-4">
             <div className="grid grid-cols-2 gap-4">
                 <div className="col-span-2">
                     <SearchableSelect
@@ -135,9 +134,9 @@ const TransportForm = ({ onSubmit, onCancel, initialData, isLoading }: Transport
 
             <div className="flex justify-end gap-2">
                 <Button text="Odustani" onClick={onCancel} variant="secondary" type="button" />
-                <Button text={initialData ? 'Sačuvaj' : 'Dodaj'} type="submit" isLoading={isLoading} />
+                <Button text={initialData ? 'Sačuvaj' : 'Dodaj'} type="button" onClick={handleSubmit} isLoading={isLoading} />
             </div>
-        </form>
+        </div>
     )
 }
 

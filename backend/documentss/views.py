@@ -6,7 +6,7 @@ from core.permissions import IsZaposlen
 
 
 class DokumentViewSet(SoftDeleteMixin, viewsets.ModelViewSet):
-    queryset = Dokument.objects.filter(is_active=True).select_related('poslovni_partner', 'zaposleni', 'zaposleni__pozicija', 'skladiste_ulaza', 'skladiste_izlaza', 'transport', 'transport__vozilo', 'transport__vozac')
+    queryset = Dokument.objects.filter(is_active=True).select_related('poslovni_partner', 'zaposleni', 'zaposleni__pozicija', 'skladiste_ulaza', 'skladiste_izlaza', 'transport', 'transport__vozilo', 'transport__vozac').order_by('-created_at')
     filterset_fields = ['tip', 'status', 'poslovni_partner', 'zaposleni', 'skladiste_ulaza', 'skladiste_izlaza']
 
     def get_permissions(self):

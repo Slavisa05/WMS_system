@@ -30,6 +30,21 @@ class StavkeDokumentaWriteSerializer(serializers.ModelSerializer):
         
         return data
 
+
+class StavkeDokumentaNestedSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = StavkeDokumenta
+        exclude = ['dokument']
+
+    def validate(self, data):
+        if data.get('kolicina') <= 0:
+            raise serializers.ValidationError('Količina ne može biti manja ili jednaka 0')
+        
+        if data.get('cena') <= 0:
+            raise serializers.ValidationError('Cena ne može biti manja ili jednaka 0')
+        
+        return data
+
 class DokumentReadSerializer(serializers.ModelSerializer):
     poslovni_partner = PoslovniPartnerSerializer()
     zaposleni = ZaposleniReadSerializer()
@@ -44,6 +59,8 @@ class DokumentReadSerializer(serializers.ModelSerializer):
 
 
 class DokumentWriteSerializer(serializers.ModelSerializer):
+    stavke = StavkeDokumentaNestedSerializer(many=True)
+
     class Meta:
         model = Dokument
         fields = '__all__'
@@ -69,11 +86,26 @@ class DokumentWriteSerializer(serializers.ModelSerializer):
                 raise serializers.ValidationError('Skladište ulaza i izlaza ne mogu biti isti')
         
         return data
+
+    def create(self, validated_data):
+        stavke_data = validated_data.pop('stavke', [])
+        dokument = Dokument.objects.create(**validated_data)
+        for stavka_data in stavke_data:
+            StavkeDokumenta.objects.create(dokument=dokument, **stavka_data)
+        return dokument
     
     def update(self, instance, validated_data):
+        stavke_data = validated_data.pop('stavke', None)
         novi_status = validated_data.get('status')
         
         if novi_status == 'ODOBREN' and instance.status != 'ODOBREN':
             obradi_dokument(instance)
         
-        return super().update(instance, validated_data)
+        instance = super().update(instance, validated_data)
+
+        if stavke_data is not None:
+            instance.stavke.all().delete()
+            for stavka_data in stavke_data:
+                StavkeDokumenta.objects.create(dokument=instance, **stavka_data)
+
+        return instance

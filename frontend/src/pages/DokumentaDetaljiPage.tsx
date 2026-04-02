@@ -1,5 +1,5 @@
 import { Clock, Calendar, User, Building2, LogIn, LogOut, Truck } from "lucide-react"
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import { formatDatum } from "@/lib/utils";
 import Header from "@/components/Header";
 import Button from "@/components/Button";
@@ -8,6 +8,7 @@ import useDokument from "@/hooks/useDokument";
 
 const DokumentaDetaljiPage = () => {
     const { id } = useParams();
+    const navigate = useNavigate();
     const { dokument, isLoading, error } = useDokument(Number(id));
 
     if (isLoading) return 'Loading...';
@@ -21,8 +22,7 @@ const DokumentaDetaljiPage = () => {
                 <div className="flex flex-wrap gap-8 justify-between items-center w-full">
                     <h2>{dokument?.tip} #{dokument?.id}</h2>
                     <div className="flex items-center gap-2 py-4 px-8 rounded-xl bg-sidebar">
-                        <Button text='prihvati' />
-                        <Button text='odbij' variant='secondary' />
+                        <Button text='izmeni' onClick={() => navigate(`/dokumenta/${id}/uredi_dokument`)} />
                     </div>
                 </div>
 
@@ -32,7 +32,13 @@ const DokumentaDetaljiPage = () => {
                 <p className="flex items-center gap-2"><Building2 size={16} className="text-text-muted shrink-0" />Poslovni partner: {dokument?.poslovni_partner?.naziv ?? '/'}</p>
                 <p className="flex items-center gap-2"><LogIn size={16} className="text-text-muted shrink-0" />Skladiste ulaza: {dokument?.skladiste_ulaza?.naziv ?? '/'}</p>
                 <p className="flex items-center gap-2"><LogOut size={16} className="text-text-muted shrink-0" />Skladiste izlaza: {dokument?.skladiste_izlaza?.naziv ?? '/'}</p>
-                <p className="flex items-center gap-2"><Truck size={16} className="text-text-muted shrink-0" />ID Transporta: {dokument?.transport?.id ?? '/'}</p>
+                <p className="flex items-center gap-2">
+                    <Truck size={16} className="text-text-muted shrink-0" />
+                    Transport:{' '}
+                    {dokument?.transport
+                        ? <a href={`/transporti/${dokument.transport.id}`} className="text-primary hover:underline">#{dokument.transport.id}</a>
+                        : '/'}
+                </p>
             </div>
 
             <div className="flex flex-col gap-2">

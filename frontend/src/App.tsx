@@ -18,6 +18,7 @@ import ProizvodiDetaljiPage from '@/pages/ProizvodiDetaljiPage'
 import ZalihePage from '@/pages/ZalihePage'
 import DokumentaPage from '@/pages/DokumentaPage'
 import DokumentaDetaljiPage from '@/pages/DokumentaDetaljiPage'
+import DokumentFormPage from '@/pages/DokumentFormPage'
 import PartneriPage from '@/pages/PartneriPage'
 import PartneriDetaljiPage from '@/pages/PartneriDetaljiPage'
 import VozilaPage from '@/pages/VozilaPage'
@@ -66,6 +67,8 @@ const App = () => {
             <Route element={<MainLayout />}>
               <Route path="/dokumenta" element={<DokumentaPage />} />
               <Route path="/dokumenta/:id" element={<DokumentaDetaljiPage />} />
+              <Route path="/dokumenta/dodaj_dokument" element={<DokumentFormPage />} />
+              <Route path="/dokumenta/:id/uredi_dokument" element={<DokumentFormPage />} />
 
               <Route path="/partneri" element={<PartneriPage />} />
               <Route path="/partneri/:id" element={<PartneriDetaljiPage />} />

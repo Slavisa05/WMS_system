@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Plus } from "lucide-react";
+import { Link } from "react-router-dom";
 import Header from "@/components/Header";
 import Button from "@/components/Button";
 import DocumentLogItem from "@/components/DocumentLogItem";
@@ -40,7 +41,11 @@ const DokumentaPage = () => {
                     { value: selectedStatus, onChange: setSelectedStatus, placeholder: 'Svi statusi', options: status  },
                     { value: selectedTip, onChange: setSelectedTip, placeholder: 'Svi tipovi', options: tip  },
                 ]}
-                action={<Button icon={Plus} text="Novi dokument" />}
+                action={
+                <Link to="dodaj_dokument/">
+                    <Button icon={Plus} text="Novi dokument" />
+                </Link>
+                }
             />
 
             <div className="flex flex-col gap-4">
