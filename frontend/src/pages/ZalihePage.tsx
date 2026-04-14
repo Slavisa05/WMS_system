@@ -24,7 +24,7 @@ const ZalihePage = () => {
             || z.slot.sektor.skladiste.naziv.toLowerCase().includes(search.toLowerCase());
         const matchProizvod = selectedProizvod === '' || z.proizvod.naziv === selectedProizvod;
         const matchSlot = selectedSlot === '' || z.slot.naziv === selectedSlot;
-        return matchSearch && matchProizvod && matchSlot;
+        return matchSearch && matchProizvod && matchSlot && z.kolicina > 0;
     });
 
     return(

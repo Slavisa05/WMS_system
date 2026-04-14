@@ -1,10 +1,21 @@
+from django.db import models
 from inventory.models import Zalihe
+
+def proveri_kapacitet_slota(slot, stavka_kolicina):
+    trenutna_kolicina = Zalihe.objects.filter(slot=slot).aggregate(
+        ukupno=models.Sum('kolicina')
+    )['ukupno'] or 0
+
+    slobodno = slot.kapacitet - trenutna_kolicina
+    if stavka_kolicina > slobodno:
+        raise Exception(f'Slot {slot.naziv} nema dovoljno mesta. Slobodno: {slobodno}, potrebno: {stavka_kolicina}')
 
 
 def povecaj_zalihe(dokument):
     stavke = dokument.stavke.all()
 
     for stavka in stavke:
+        proveri_kapacitet_slota(stavka.slot_ulaza, stavka.kolicina)
         zalihe, created = Zalihe.objects.get_or_create(
             proizvod=stavka.proizvod,
             slot=stavka.slot_ulaza, 
@@ -25,7 +36,7 @@ def smanji_zalihe(dokument):
                 slot=stavka.slot_izlaza
             )
         except Zalihe.DoesNotExist:
-            raise Exception(f'Nema zaliha za proizvod {stavka.proizvod.naziv} na slotu {stavka.slot}')
+            raise Exception(f'Nema zaliha za proizvod {stavka.proizvod.naziv} na slotu {stavka.slot_izlaza}')
         
         dostupna_kolicina = zalihe.kolicina - zalihe.rezervisana_kolicina
         if dostupna_kolicina < stavka.kolicina:
@@ -40,6 +51,7 @@ def obradi_medjuskladisnicu(dokument):
 
     for stavka in stavke:
         try:
+            proveri_kapacitet_slota(stavka.slot_ulaza, stavka.kolicina) 
             zalihe_izlaz = Zalihe.objects.get(
                 proizvod=stavka.proizvod,
                 slot=stavka.slot_izlaza
@@ -85,6 +97,7 @@ def prenesi_zalihe(dokument):
             raise Exception(f'Interni prenos mora biti unutar istog skladišta')
 
         try:
+            proveri_kapacitet_slota(stavka.slot_ulaza, stavka.kolicina)
             zalihe_izlaz = Zalihe.objects.get(
                 proizvod=stavka.proizvod,
                 slot=stavka.slot_izlaza
@@ -107,6 +120,52 @@ def prenesi_zalihe(dokument):
         )
         zalihe_ulaz.kolicina += stavka.kolicina
         zalihe_ulaz.save()
+
+
+def rezervisi_zalihe(dokument):
+    stavke = dokument.stavke.all()
+    tipovi = ['OTPREMNICA', 'POVRATNICA_D', 'OTPIS', 'MEDJUSKLADISNICA', 'PRENOS']
+
+    if dokument.tip not in tipovi:
+        return
+
+    for stavka in stavke:
+        try:
+            zalihe = Zalihe.objects.get(
+                proizvod=stavka.proizvod,
+                slot=stavka.slot_izlaza
+            )
+        except Zalihe.DoesNotExist:
+            raise Exception(f'Nema zaliha za proizvod {stavka.proizvod.naziv} na slotu {stavka.slot_izlaza}')
+        
+        dostupna_kolicina = zalihe.kolicina - zalihe.rezervisana_kolicina
+        if dostupna_kolicina < stavka.kolicina:
+            raise Exception(f'Nedovoljno zaliha za proizvod {stavka.proizvod.naziv}')
+        
+        zalihe.rezervisana_kolicina += stavka.kolicina
+        zalihe.save()
+            
+
+
+def oslobodi_zalihe(dokument):
+    stavke = dokument.stavke.all()
+    tipovi = ['OTPREMNICA', 'POVRATNICA_D', 'OTPIS', 'MEDJUSKLADISNICA', 'PRENOS']
+
+    if dokument.tip not in tipovi:
+        return
+    
+    for stavka in stavke:
+        try:
+            zalihe = Zalihe.objects.get(
+                proizvod=stavka.proizvod,
+                slot=stavka.slot_izlaza
+            )
+        except Zalihe.DoesNotExist:
+            raise Exception(f'Nema zaliha za proizvod {stavka.proizvod.naziv} na slotu {stavka.slot_izlaza}')
+        
+     
+        zalihe.rezervisana_kolicina -= stavka.kolicina
+        zalihe.save()
 
 
 

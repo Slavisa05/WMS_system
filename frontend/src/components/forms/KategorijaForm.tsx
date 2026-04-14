@@ -3,14 +3,20 @@ import type { Kategorija } from '@/types/inventar'
 import Button from '@/components/Button'
 import FormInput from '@/components/forms/FormInput'
 
+export interface KategorijaFormErrors {
+    naziv?: string
+    form?: string
+}
+
 interface KategorijaFormProps {
     onSubmit: (data: { naziv: string }) => void
     onCancel: () => void
     initialData?: Kategorija | null  
     isLoading?: boolean
+    errors?: KategorijaFormErrors
 }
 
-const KategorijaForm = ({ onSubmit, onCancel, initialData, isLoading }: KategorijaFormProps) => {
+const KategorijaForm = ({ onSubmit, onCancel, initialData, isLoading, errors }: KategorijaFormProps) => {
     const [naziv, setNaziv] = useState('')
 
     useEffect(() => {
@@ -27,14 +33,21 @@ const KategorijaForm = ({ onSubmit, onCancel, initialData, isLoading }: Kategori
     }
 
     return (
-        <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+        <form onSubmit={handleSubmit} noValidate className="flex flex-col gap-4">
             <FormInput
                 label="Naziv"
                 value={naziv}
                 onChange={setNaziv}
                 placeholder="Naziv kategorije"
                 required
+                            error={errors?.naziv}
             />
+            {errors?.form && (
+                <p className="text-sm text-red-500 bg-red-50 border border-red-200 rounded-lg px-3 py-2">
+                    {errors.form}
+                </p>
+            )}
+
 
             <div className="flex justify-end gap-2">
                 <Button text="Odustani" onClick={onCancel} variant="secondary" type="button" />

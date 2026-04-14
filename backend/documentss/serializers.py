@@ -1,6 +1,6 @@
 from rest_framework import serializers
+from django.utils import timezone
 from .models import Dokument, StavkeDokumenta
-from .services import obradi_dokument
 from partners.serializers import PoslovniPartnerSerializer
 from accounts.serializers import ZaposleniReadSerializer
 from warehouse.serializers import SkladisteSerializer
@@ -69,8 +69,11 @@ class DokumentWriteSerializer(serializers.ModelSerializer):
         ZAHTEVA_PARTNERA = ['PRIJEMNICA', 'POVRATNICA_K', 'OTPREMNICA', 'POVRATNICA_D']
         ZAHTEVA_ULAZ = ['PRIJEMNICA', 'POVRATNICA_K', 'MEDJUSKLADISNICA', 'PRENOS']
         ZAHTEVA_IZLAZ = ['OTPREMNICA', 'POVRATNICA_D', 'MEDJUSKLADISNICA', 'PRENOS']
+        ZATVORENI_STATUSI_TRANSPORTA = ['ZAVRSENO', 'OTKAZANO', 'NEUSPESNO']
 
-        tip = data.get('tip')
+        tip = data.get('tip', self.instance.tip if self.instance else None)
+        transport = data.get('transport', self.instance.transport if self.instance else None)
+        datum_vreme = data.get('datum_vreme', self.instance.datum_vreme if self.instance else None)
 
         if tip in ZAHTEVA_PARTNERA and not data.get('poslovni_partner'):
             raise serializers.ValidationError('Ovaj tip dokumenta zahteva poslovnog partnera')
@@ -84,6 +87,16 @@ class DokumentWriteSerializer(serializers.ModelSerializer):
         if data.get('skladiste_ulaza') and data.get('skladiste_izlaza'):
             if data['skladiste_ulaza'] == data['skladiste_izlaza']:
                 raise serializers.ValidationError('Skladište ulaza i izlaza ne mogu biti isti')
+
+        if transport:
+            if transport.datum_polaska < timezone.now():
+                raise serializers.ValidationError('Ne možete povezati dokument sa transportom kojem je datum polaska prošao.')
+
+            if transport.status in ZATVORENI_STATUSI_TRANSPORTA:
+                raise serializers.ValidationError('Ne možete povezati dokument sa transportom koji je već završen, otkazan ili neuspešan.')
+
+            if datum_vreme and datum_vreme > transport.datum_polaska:
+                raise serializers.ValidationError('Datum i vreme dokumenta ne mogu biti posle datuma polaska transporta.')
         
         return data
 
@@ -96,10 +109,9 @@ class DokumentWriteSerializer(serializers.ModelSerializer):
     
     def update(self, instance, validated_data):
         stavke_data = validated_data.pop('stavke', None)
-        novi_status = validated_data.get('status')
-        
-        if novi_status == 'ODOBREN' and instance.status != 'ODOBREN':
-            obradi_dokument(instance)
+
+        if instance.status != 'NACRT':
+            raise serializers.ValidationError('Ne možete menjati dokument koji nije nacrt.')
         
         instance = super().update(instance, validated_data)
 

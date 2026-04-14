@@ -3,6 +3,15 @@ import type { Proizvod } from "@/types/inventar"
 import useKategorije from "@/hooks/useKategorije"
 import Button from "../Button"
 import FormInput from "./FormInput"
+export interface ProizvodFormErrors {
+    naziv?: string
+    barkod?: string
+    sifra?: string
+    jedinica_mere?: string
+    kategorija?: string
+    form?: string
+}
+
 
 interface ProizvodFormProps {
     onSubmit: (data: { 
@@ -15,9 +24,10 @@ interface ProizvodFormProps {
     onCancel: () => void
     initialData?: Proizvod | null
     isLoading?: boolean
+    errors?: ProizvodFormErrors
 }
 
-const ProizvodForm = ({ onSubmit, onCancel, initialData, isLoading }: ProizvodFormProps) => {
+const ProizvodForm = ({ onSubmit, onCancel, initialData, isLoading, errors }: ProizvodFormProps) => {
     const { kategorije } = useKategorije()
     const [naziv, setNaziv] = useState('')
     const [barkod, setBarkod] = useState('')
@@ -48,10 +58,10 @@ const ProizvodForm = ({ onSubmit, onCancel, initialData, isLoading }: ProizvodFo
     }
 
     return (
-        <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-            <FormInput label="Naziv" value={naziv} onChange={setNaziv} placeholder="Naziv proizvoda" required />
-            <FormInput label="Barkod" value={barkod} onChange={setBarkod} placeholder="Barkod" required />
-            <FormInput label="Šifra" value={sifra} onChange={setSifra} placeholder="Šifra" required />
+        <form onSubmit={handleSubmit} noValidate className="flex flex-col gap-4">
+            <FormInput label="Naziv" value={naziv} onChange={setNaziv} placeholder="Naziv proizvoda" required error={errors?.naziv} />
+            <FormInput label="Barkod" value={barkod} onChange={setBarkod} placeholder="Barkod" required error={errors?.barkod} />
+            <FormInput label="Šifra" value={sifra} onChange={setSifra} placeholder="Šifra" required error={errors?.sifra} />
 
             <div className="flex flex-col gap-1">
                 <label className="text-sm text-sidebar-text">Jedinica mere</label>
@@ -67,6 +77,7 @@ const ProizvodForm = ({ onSubmit, onCancel, initialData, isLoading }: ProizvodFo
                     <option className="bg-sidebar text-sidebar-text" value="l">l</option>
                     <option className="bg-sidebar text-sidebar-text" value="kol">kol</option>
                 </select>
+                            {errors?.jedinica_mere && <p className="text-xs text-red-500">{errors.jedinica_mere}</p>}
             </div>
 
             <div className="flex flex-col gap-1">
@@ -82,6 +93,13 @@ const ProizvodForm = ({ onSubmit, onCancel, initialData, isLoading }: ProizvodFo
                             {k.naziv}
                         </option>
                     ))}
+                                {errors?.kategorija && <p className="text-xs text-red-500">{errors.kategorija}</p>}
+                            {errors?.form && (
+                                <p className="text-sm text-red-500 bg-red-50 border border-red-200 rounded-lg px-3 py-2">
+                                    {errors.form}
+                                </p>
+                            )}
+
                 </select>
             </div>
 

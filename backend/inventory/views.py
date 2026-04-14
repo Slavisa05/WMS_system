@@ -24,6 +24,8 @@ class ProizvodViewSet(SoftDeleteMixin, viewsets.ModelViewSet):
     search_fields = ['naziv', 'barkod', 'sifra']
 
     def get_permissions(self):
+        if self.action in ['list', 'retrieve']:
+            return [IsZaposlen()]
         return [IsMenadzer()]
 
     def get_serializer_class(self):

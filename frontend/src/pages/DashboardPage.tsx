@@ -21,8 +21,18 @@ const DashboardPage = () => {
     const { skladista } = useSkladista();
     const { vozila } = useVozila();
 
-    const poslednjiDokumenti = dokumenta.slice(-5).reverse();
-    const poslednjiTransporti = transporti.slice(-5).reverse();
+    const toTime = (dateStr: string) => {
+        const timestamp = new Date(dateStr).getTime();
+        return Number.isNaN(timestamp) ? 0 : timestamp;
+    };
+
+    const poslednjiDokumenti = [...dokumenta]
+        .sort((a, b) => toTime(b.datum_vreme) - toTime(a.datum_vreme))
+        .slice(0, 5);
+
+    const poslednjiTransporti = [...transporti]
+        .sort((a, b) => toTime(b.datum_polaska) - toTime(a.datum_polaska))
+        .slice(0, 5);
     const aktivniTransporti = transporti.filter(t => t.status === 'ZAKAZANO' || t.status === 'U_TOKU').length;
     const naCekanjuDokumenta = dokumenta.filter(d => d.status === 'NA_CEKANJU').length;
     const neuspesniTransporti = transporti.filter(t => t.status === 'NEUSPESNO').length;

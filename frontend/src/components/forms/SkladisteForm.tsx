@@ -3,6 +3,14 @@ import type { Skladiste } from "@/types/skladiste"
 import Button from "../Button"
 import FormInput from "./FormInput"
 
+export interface SkladisteFormErrors {
+    naziv?: string
+    adresa?: string
+    telefon?: string
+    tip?: string
+    form?: string
+}
+
 interface SkladisteFormProps {
     onSubmit: (data: {
         naziv: string,
@@ -13,9 +21,10 @@ interface SkladisteFormProps {
     onCancel: () => void
     initialData?: Skladiste | null  
     isLoading?: boolean
+    errors?: SkladisteFormErrors
 }
 
-const SkladisteForm = ({ onSubmit, onCancel, initialData, isLoading }: SkladisteFormProps) => {
+const SkladisteForm = ({ onSubmit, onCancel, initialData, isLoading, errors }: SkladisteFormProps) => {
     const [naziv, setNaziv] = useState('')
     const [adresa, setAdresa] = useState('')
     const [telefon, setTelefon] = useState('')
@@ -41,10 +50,10 @@ const SkladisteForm = ({ onSubmit, onCancel, initialData, isLoading }: Skladiste
     }
 
     return(
-        <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-            <FormInput label="Naziv" value={naziv} onChange={setNaziv} placeholder="Naziv skladista" required />
-            <FormInput label="Adresa" value={adresa} onChange={setAdresa} placeholder="Adresa" required />
-            <FormInput label="Telefon" value={telefon} onChange={setTelefon} placeholder="+381..." required />
+        <form onSubmit={handleSubmit} noValidate className="flex flex-col gap-4">
+            <FormInput label="Naziv" value={naziv} onChange={setNaziv} placeholder="Naziv skladista" required error={errors?.naziv} />
+            <FormInput label="Adresa" value={adresa} onChange={setAdresa} placeholder="Adresa" required error={errors?.adresa} />
+            <FormInput label="Telefon" value={telefon} onChange={setTelefon} placeholder="+381..." required error={errors?.telefon} />
 
             <div className="flex flex-col gap-1">
                 <label className="text-sm text-sidebar-text">Tip</label>
@@ -58,7 +67,14 @@ const SkladisteForm = ({ onSubmit, onCancel, initialData, isLoading }: Skladiste
                     <option className='bg-sidebar text-sidebar-text' value="MALO">Maloprodajni magacin</option>
                     <option className='bg-sidebar text-sidebar-text' value="TRAN">Tranzit</option>
                 </select>
+                {errors?.tip && <p className="text-xs text-red-500">{errors.tip}</p>}
             </div>
+
+            {errors?.form && (
+                <p className="text-sm text-red-500 bg-red-50 border border-red-200 rounded-lg px-3 py-2">
+                    {errors.form}
+                </p>
+            )}
 
             <div className="flex justify-end gap-2">
                 <Button text="Odustani" onClick={onCancel} variant="secondary" type="button" />

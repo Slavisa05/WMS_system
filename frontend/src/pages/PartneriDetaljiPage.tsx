@@ -9,7 +9,7 @@ import usePartner from "@/hooks/usePartner";
 import useDokumenta from "@/hooks/useDokumenta";
 import Modal from "@/components/Modal";
 import ConfirmModal from "@/components/ConfirmModal";
-import PartnerForm from "@/components/forms/PartnerForm";
+import PartnerForm, { type PartnerFormErrors } from "@/components/forms/PartnerForm";
 
 const PartneriDetaljiPage = () => {
     const { id } = useParams()
@@ -20,16 +20,49 @@ const PartneriDetaljiPage = () => {
     const [isEditOpen, setIsEditOpen] = useState(false)
     const [isDeleteOpen, setIsDeleteOpen] = useState(false)
     const [isSubmitting, setIsSubmitting] = useState(false)
+    const [partnerErrors, setPartnerErrors] = useState<PartnerFormErrors>({})
 
-    const handleEdit = async (data: { naziv: string }) => {
+    const getFirstErrorMessage = (value: unknown): string | undefined => {
+        if (Array.isArray(value)) {
+            const first = value[0]
+            return typeof first === 'string' ? first : undefined
+        }
+        return typeof value === 'string' ? value : undefined
+    }
+
+    const parsePartnerErrors = (err: any): PartnerFormErrors => {
+        const data = err?.response?.data
+        if (!data || typeof data !== 'object') {
+            return { form: 'Greška pri izmeni partnera' }
+        }
+
+        const fieldErrors: PartnerFormErrors = {
+            naziv: getFirstErrorMessage(data.naziv),
+            pib: getFirstErrorMessage(data.pib),
+            email: getFirstErrorMessage(data.email),
+            adresa: getFirstErrorMessage(data.adresa),
+            telefon: getFirstErrorMessage(data.telefon),
+            tip: getFirstErrorMessage(data.tip),
+            form: getFirstErrorMessage(data.detail) || getFirstErrorMessage(data.non_field_errors),
+        }
+
+        if (!fieldErrors.naziv && !fieldErrors.pib && !fieldErrors.email && !fieldErrors.adresa && !fieldErrors.telefon && !fieldErrors.tip && !fieldErrors.form) {
+            fieldErrors.form = 'Greška pri izmeni partnera'
+        }
+
+        return fieldErrors
+    }
+
+    const handleEdit = async (data: { naziv: string, pib: string, email: string, adresa: string, telefon: string, tip: 'D' | 'K' }) => {
         if (!partner) return
         setIsSubmitting(true)
+        setPartnerErrors({})
         try {
             await updatePartner(partner.id, data)
             setIsEditOpen(false)
             refetch()
-        } catch {
-            alert('Greška pri izmeni partnera')
+        } catch (err: any) {
+            setPartnerErrors(parsePartnerErrors(err))
         } finally {
             setIsSubmitting(false)
         }
@@ -81,12 +114,23 @@ const PartneriDetaljiPage = () => {
                 ))}
             </div>
 
-            <Modal isOpen={isEditOpen} title="Izmeni kategoriju" onClose={() => setIsEditOpen(false)}>
+            <Modal
+                isOpen={isEditOpen}
+                title="Izmeni kategoriju"
+                onClose={() => {
+                    setPartnerErrors({})
+                    setIsEditOpen(false)
+                }}
+            >
                 <PartnerForm
                     initialData={partner}
                     onSubmit={handleEdit}
-                    onCancel={() => setIsEditOpen(false)}
+                    onCancel={() => {
+                        setPartnerErrors({})
+                        setIsEditOpen(false)
+                    }}
                     isLoading={isSubmitting}
+                    errors={partnerErrors}
                 />
             </Modal>
 

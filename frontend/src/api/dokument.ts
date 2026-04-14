@@ -31,3 +31,15 @@ export const updateDokument = (id: number, data: { tip: TipDokumenta, datum_vrem
 export const deleteDokument = (id: number) => {
     return api.delete(`/documentss/dokumenta/${id}/`);
 }
+
+export const posaljiDokument = (id: number) => {
+    return api.post(`/documentss/dokumenta/${id}/posalji/`);
+}
+
+export const odobriDokument = (id: number) => {
+    return api.post(`/documentss/dokumenta/${id}/odobri/`);
+}
+
+export const odbijDokument = (id: number) => {
+    return api.post(`/documentss/dokumenta/${id}/odbij/`);
+}

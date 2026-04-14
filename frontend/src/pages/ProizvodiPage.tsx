@@ -7,7 +7,7 @@ import ProizvodCard from "@/components/ProizvodCard";
 import SearchBar from "@/components/SearchBar";
 import useProizvodi from "@/hooks/useProizvode";
 import Modal from "@/components/Modal";
-import ProizvodForm from "@/components/forms/ProizvodForm";
+import ProizvodForm, { type ProizvodFormErrors } from "@/components/forms/ProizvodForm";
 
 const ProizvodiPage = () => {
     const { proizvodi, isLoading, error, refetch } = useProizvodi()
@@ -15,15 +15,47 @@ const ProizvodiPage = () => {
     const [selectedKategorija, setSelectedKategorija] = useState('')
     const [isAddOpen, setIsAddOpen] = useState(false)
     const [isSubmitting, setIsSubmitting] = useState(false)
+    const [proizvodErrors, setProizvodErrors] = useState<ProizvodFormErrors>({})
+
+    const getFirstErrorMessage = (value: unknown): string | undefined => {
+        if (Array.isArray(value)) {
+            const first = value[0]
+            return typeof first === 'string' ? first : undefined
+        }
+        return typeof value === 'string' ? value : undefined
+    }
+
+    const parseProizvodErrors = (err: any): ProizvodFormErrors => {
+        const data = err?.response?.data
+        if (!data || typeof data !== 'object') {
+            return { form: 'Greška pri dodavanju proizvoda' }
+        }
+
+        const fieldErrors: ProizvodFormErrors = {
+            naziv: getFirstErrorMessage(data.naziv),
+            barkod: getFirstErrorMessage(data.barkod),
+            sifra: getFirstErrorMessage(data.sifra),
+            jedinica_mere: getFirstErrorMessage(data.jedinica_mere),
+            kategorija: getFirstErrorMessage(data.kategorija),
+            form: getFirstErrorMessage(data.detail) || getFirstErrorMessage(data.non_field_errors),
+        }
+
+        if (!fieldErrors.naziv && !fieldErrors.barkod && !fieldErrors.sifra && !fieldErrors.jedinica_mere && !fieldErrors.kategorija && !fieldErrors.form) {
+            fieldErrors.form = 'Greška pri dodavanju proizvoda'
+        }
+
+        return fieldErrors
+    }
 
     const handleAdd = async (data: { naziv: string, barkod: string, sifra: string, jedinica_mere: 'g' | 'kg' | 't' | 'ml' | 'l' | 'kol', kategorija: number }) => {
         setIsSubmitting(true)
+            setProizvodErrors({})
         try {
             await createProizvod(data)
             setIsAddOpen(false)
             refetch()
-        } catch {
-            alert('Greška pri dodavanju proizvoda')
+        } catch (err: any) {
+            setProizvodErrors(parseProizvodErrors(err))
         } finally {
             setIsSubmitting(false)
         }
@@ -60,11 +92,22 @@ const ProizvodiPage = () => {
                 ))}
             </div>
 
-            <Modal isOpen={isAddOpen} title="Dodaj proizvod" onClose={() => setIsAddOpen(false)}>
+            <Modal
+                isOpen={isAddOpen}
+                title="Dodaj proizvod"
+                onClose={() => {
+                    setProizvodErrors({})
+                    setIsAddOpen(false)
+                }}
+            >
                 <ProizvodForm 
                     onSubmit={handleAdd}
-                    onCancel={() => setIsAddOpen(false)}
+                    onCancel={() => {
+                        setProizvodErrors({})
+                        setIsAddOpen(false)
+                    }}
                     isLoading={isSubmitting}
+                                    errors={proizvodErrors}
                 />
             </Modal>
         </section>

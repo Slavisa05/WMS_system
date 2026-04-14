@@ -31,8 +31,10 @@ const AuthProvider = ({ children }: { children: ReactNode }): JSX.Element => {
         try {
             const res = await api.get('/accounts/me/') 
             setUser(res.data)
-        } catch {
-            localStorage.clear()
+        } catch (error: any) {
+            if (error?.response?.status !== 401) {
+                localStorage.clear()
+            }
         } finally {
             setIsLoading(false)
         }

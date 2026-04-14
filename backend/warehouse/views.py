@@ -12,7 +12,7 @@ class SkladisteViewSet(SoftDeleteMixin, viewsets.ModelViewSet):
 
     def get_permissions(self):
         if self.action in ['list', 'retrieve']:
-            return [IsMenadzer()]
+            return [IsZaposlen()]
         return [IsAdmin()]
 
 
@@ -21,7 +21,7 @@ class SektorViewSet(SoftDeleteMixin, viewsets.ModelViewSet):
     
     def get_permissions(self):
         if self.action in ['list', 'retrieve']:
-            return [IsMenadzer()]
+            return [IsZaposlen()]
         return [IsAdmin()]
 
     def get_serializer_class(self):
@@ -35,7 +35,7 @@ class SlotViewSet(SoftDeleteMixin, viewsets.ModelViewSet):
 
     def get_permissions(self):
         if self.action in ['list', 'retrieve']:
-            return [IsMenadzer()]
+            return [IsZaposlen()]
         return [IsAdmin()]
 
     def get_serializer_class(self):

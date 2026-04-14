@@ -13,7 +13,6 @@ const SkladisteCard = ({ id, naziv, adresa, tip }: Skladiste) => {
                 <Link to={`/skladista/${id}`}>
                     <MainButton text="detalji" />
                 </Link>
-                <MainButton text="izbriši" variant="secondary" />
             </div>
         </div>
     );

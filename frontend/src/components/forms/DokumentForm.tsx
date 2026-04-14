@@ -4,6 +4,7 @@ import DatePicker from "react-datepicker"
 import "react-datepicker/dist/react-datepicker.css"
 import type { Dokument } from "@/types/dokument"
 import { createTransport } from "@/api/transport"
+import { useAuth } from "@/context/AuthContext"
 import usePartneri from "@/hooks/usePartneri"
 import useZaposlene from "@/hooks/useZaposlene"
 import useSkladista from "@/hooks/useSkladista"
@@ -38,11 +39,25 @@ export interface DokumentPayload {
     stavke: StavkaPayload[]
 }
 
+export interface DokumentFormErrors {
+    tip?: string
+    datum_vreme?: string
+    poslovni_partner?: string
+    zaposleni?: string
+    skladiste_ulaza?: string
+    skladiste_izlaza?: string
+    transport?: string
+    status?: string
+    stavke?: string
+    form?: string
+}
+
 interface DokumentFormProps {
     onSubmit: (data: DokumentPayload) => void
     onCancel: () => void
     initialData?: Dokument | null
     isLoading?: boolean
+    errors?: DokumentFormErrors
 }
 
 interface StavkaRow {
@@ -61,7 +76,8 @@ const newRow = (): StavkaRow => ({
 
 const inputCls = "px-4 py-2 rounded-xl border border-border text-sm text-sidebar-text bg-sidebar focus:outline-none focus:border-primary"
 
-const DokumentForm = ({ onSubmit, onCancel, initialData, isLoading }: DokumentFormProps) => {
+const DokumentForm = ({ onSubmit, onCancel, initialData, isLoading, errors }: DokumentFormProps) => {
+    const { user } = useAuth()
     const { zaposlene } = useZaposlene()
     const { partneri } = usePartneri()
     const { skladista } = useSkladista()
@@ -79,10 +95,26 @@ const DokumentForm = ({ onSubmit, onCancel, initialData, isLoading }: DokumentFo
     const [status, setStatus] = useState<StatusDokumenta>('NACRT')
     const [stavke, setStavke] = useState<StavkaRow[]>([newRow()])
 
+    const slotoviUlaza = skladisteUlazaId !== ''
+        ? slotovi.filter(s => s.sektor.skladiste.id === skladisteUlazaId)
+        : []
+    const slotoviIzlaza = skladisteIzlazaId !== ''
+        ? slotovi.filter(s => s.sektor.skladiste.id === skladisteIzlazaId)
+        : []
+
     const toDate = (val?: string | null) => val ? new Date(val) : null
 
     const [isAddOpen, setIsAddOpen] = useState(false)
     const [isSubmitting, setIsSubmitting] = useState(false)
+    const [stavkaError, setStavkaError] = useState<string | null>(null)
+
+    const currentZaposleni = zaposlene.find(z => z.user === user?.id)
+
+    useEffect(() => {
+        if (!initialData && currentZaposleni) {
+            setZaposleniId(currentZaposleni.id)
+        }
+    }, [currentZaposleni, initialData])
 
     const handleAdd = async (data: { vozac: number, vozilo: number, datum_polaska: string, datum_zavrsetka: string | null, status: 'ZAKAZANO' | 'U_TOKU' | 'ZAVRSENO' | 'OTKAZANO' | 'NEUSPESNO', napomena: string | null }) => {
         setIsSubmitting(true)
@@ -136,6 +168,14 @@ const DokumentForm = ({ onSubmit, onCancel, initialData, isLoading }: DokumentFo
         setStavke(prev => prev.map(s => s.tempId === tempId ? { ...s, [field]: value } : s))
     }
 
+    const resetSlotsUlaza = () => {
+        setStavke(prev => prev.map(s => ({ ...s, slot_ulaza: '' as const })))
+    }
+
+    const resetSlotsIzlaza = () => {
+        setStavke(prev => prev.map(s => ({ ...s, slot_izlaza: '' as const })))
+    }
+
     const removeStavka = (tempId: number) => {
         setStavke(prev => prev.length > 1 ? prev.filter(s => s.tempId !== tempId) : prev)
     }
@@ -145,6 +185,12 @@ const DokumentForm = ({ onSubmit, onCancel, initialData, isLoading }: DokumentFo
         if (zaposleniId === '' || !datumVreme) return
         const validStavke = stavke.filter(s => s.proizvod !== '' && s.kolicina !== '' && s.cena !== '')
         if (validStavke.length === 0) return
+        const stavkaBezSlota = validStavke.find(s => s.slot_ulaza === '' && s.slot_izlaza === '')
+        if (stavkaBezSlota) {
+            setStavkaError('Svaka stavka mora imati popunjen bar slot ulaza ili slot izlaza.')
+            return
+        }
+        setStavkaError(null)
         onSubmit({
             tip,
             datum_vreme: datumVreme.toISOString(),
@@ -165,10 +211,10 @@ const DokumentForm = ({ onSubmit, onCancel, initialData, isLoading }: DokumentFo
     }
 
     return (
-        <form onSubmit={handleSubmit} className="flex flex-col gap-6 bg-sidebar p-5 rounded-xl">
+        <form onSubmit={handleSubmit} noValidate className="flex flex-col gap-6 bg-sidebar p-5 rounded-xl">
             {/* Zaglavlje dokumenta */}
             <div className="grid grid-cols-2 gap-4">
-                <div className="flex flex-col gap-1">
+                <div className="flex flex-col gap-1 col-span-2">
                     <label className="text-sm text-sidebar-text">Tip dokumenta</label>
                     <select value={tip} onChange={e => setTip(e.target.value as TipDokumenta)} className={inputCls}>
                         <option className="bg-sidebar" value="PRIJEMNICA">Prijemnica</option>
@@ -180,16 +226,7 @@ const DokumentForm = ({ onSubmit, onCancel, initialData, isLoading }: DokumentFo
                         <option className="bg-sidebar" value="INVENTAR">Inventar</option>
                         <option className="bg-sidebar" value="OTPIS">Otpis</option>
                     </select>
-                </div>
-
-                <div className="flex flex-col gap-1">
-                    <label className="text-sm text-sidebar-text">Status</label>
-                    <select value={status} onChange={e => setStatus(e.target.value as StatusDokumenta)} className={inputCls}>
-                        <option className="bg-sidebar" value="NACRT">Nacrt</option>
-                        <option className="bg-sidebar" value="NA_CEKANJU">Na čekanju</option>
-                        <option className="bg-sidebar" value="ODOBREN">Odobren</option>
-                        <option className="bg-sidebar" value="ODBIJEN">Odbijen</option>
-                    </select>
+                    {errors?.tip && <p className="text-sm text-red-500 bg-red-50 border border-red-200 rounded-lg px-3 py-2">{errors.tip}</p>}
                 </div>
 
                 <div className="flex flex-col gap-1 col-span-2">
@@ -206,17 +243,18 @@ const DokumentForm = ({ onSubmit, onCancel, initialData, isLoading }: DokumentFo
                         className={inputCls + " w-full"}
                         wrapperClassName="w-full"
                     />
+                    {errors?.datum_vreme && <p className="text-sm text-red-500 bg-red-50 border border-red-200 rounded-lg px-3 py-2">{errors.datum_vreme}</p>}
                 </div>
 
-                <div className="col-span-2">
-                    <SearchableSelect
-                        label="Zaposleni"
-                        options={zaposlene.map(z => ({ id: z.id, label: `${z.ime} ${z.prezime}` }))}
-                        value={zaposleniId}
-                        onChange={setZaposleniId}
-                        placeholder="Pretraži zaposlene..."
-                        required
-                    />
+                <div className="flex flex-col gap-1 col-span-2">
+                    <label className="text-sm text-sidebar-text">Zaposleni</label>
+                    <div className={inputCls + " opacity-70 cursor-not-allowed"}>
+                        {(() => {
+                            const z = zaposlene.find(z => z.id === zaposleniId)
+                            return z ? `${z.ime} ${z.prezime}` : (user ? `${user.ime} ${user.prezime}` : 'Učitavanje...')
+                        })()}
+                    </div>
+                    {errors?.zaposleni && <p className="text-sm text-red-500 bg-red-50 border border-red-200 rounded-lg px-3 py-2">{errors.zaposleni}</p>}
                 </div>
 
                 <div className="col-span-2">
@@ -226,6 +264,7 @@ const DokumentForm = ({ onSubmit, onCancel, initialData, isLoading }: DokumentFo
                         value={partnerId}
                         onChange={setPartnerId}
                         placeholder="Pretraži partnere..."
+                        error={errors?.poslovni_partner}
                     />
                 </div>
 
@@ -233,16 +272,18 @@ const DokumentForm = ({ onSubmit, onCancel, initialData, isLoading }: DokumentFo
                     label="Skladište ulaza (opciono)"
                     options={skladista.map(s => ({ id: s.id, label: s.naziv }))}
                     value={skladisteUlazaId}
-                    onChange={setSkladisteUlazaId}
+                    onChange={val => { setSkladisteUlazaId(val); resetSlotsUlaza() }}
                     placeholder="Pretraži skladišta..."
+                    error={errors?.skladiste_ulaza}
                 />
 
                 <SearchableSelect
                     label="Skladište izlaza (opciono)"
                     options={skladista.map(s => ({ id: s.id, label: s.naziv }))}
                     value={skladisteIzlazaId}
-                    onChange={setSkladisteIzlazaId}
+                    onChange={val => { setSkladisteIzlazaId(val); resetSlotsIzlaza() }}
                     placeholder="Pretraži skladišta..."
+                    error={errors?.skladiste_izlaza}
                 />
 
                 <div className="col-span-2 flex items-end gap-2">
@@ -253,10 +294,17 @@ const DokumentForm = ({ onSubmit, onCancel, initialData, isLoading }: DokumentFo
                             value={transportId}
                             onChange={setTransportId}
                             placeholder="Pretraži transporte..."
+                            error={errors?.transport}
                         />
                     </div>
                     <Button text="dodaj transport" variant="secondary" onClick={() => setIsAddOpen(true)} type="button" />
                 </div>
+
+                {errors?.form && (
+                    <p className="col-span-2 text-sm text-red-500 bg-red-50 border border-red-200 rounded-lg px-3 py-2">
+                        {errors.form}
+                    </p>
+                )}
             </div>
 
             <Modal isOpen={isAddOpen} title="Dodaj transport" onClose={() => setIsAddOpen(false)}>
@@ -266,6 +314,10 @@ const DokumentForm = ({ onSubmit, onCancel, initialData, isLoading }: DokumentFo
                     isLoading={isSubmitting}
                 />
             </Modal>
+
+            {(stavkaError || errors?.stavke) && (
+                <p className="text-sm text-red-500">{stavkaError || errors?.stavke}</p>
+            )}
 
             {/* Stavke */}
             <div className="flex flex-col gap-3">
@@ -309,18 +361,18 @@ const DokumentForm = ({ onSubmit, onCancel, initialData, isLoading }: DokumentFo
 
                             <SearchableSelect
                                 label="Slot ulaza (opciono)"
-                                options={slotovi.map(s => ({ id: s.id, label: s.naziv }))}
+                                options={slotoviUlaza.map(s => ({ id: s.id, label: `${s.naziv} - ${s.sektor.naziv}` }))}
                                 value={stavka.slot_ulaza}
                                 onChange={val => updateStavka(stavka.tempId, 'slot_ulaza', val)}
-                                placeholder="Pretraži slotove..."
+                                placeholder={skladisteUlazaId === '' ? 'Prvo izaberi skladište ulaza...' : 'Pretraži slotove...'}
                             />
 
                             <SearchableSelect
                                 label="Slot izlaza (opciono)"
-                                options={slotovi.map(s => ({ id: s.id, label: s.naziv }))}
+                                options={slotoviIzlaza.map(s => ({ id: s.id, label: `${s.naziv} - ${s.sektor.naziv}` }))}
                                 value={stavka.slot_izlaza}
                                 onChange={val => updateStavka(stavka.tempId, 'slot_izlaza', val)}
-                                placeholder="Pretraži slotove..."
+                                placeholder={skladisteIzlazaId === '' ? 'Prvo izaberi skladište izlaza...' : 'Pretraži slotove...'}
                             />
 
                             <div className="flex flex-col gap-1">

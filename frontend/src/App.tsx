@@ -27,6 +27,7 @@ import TransportiPage from '@/pages/TransportiPage'
 import TransportiDetaljiPage from '@/pages/TransportiDetaljiPage'
 import ZaposleniPage from '@/pages/ZaposleniPage'
 import ZaposleniDetaljiPage from '@/pages/ZaposleniDetaljiPage'
+import IzvestajiPage from '@/pages/IzvestajiPage'
 
 const App = () => {
   return (
@@ -52,6 +53,8 @@ const App = () => {
               <Route path="/proizvodi/:id" element={<ProizvodiDetaljiPage />} />
 
               <Route path="/zalihe" element={<ZalihePage />} />
+
+              <Route path="/izvestaji" element={<IzvestajiPage />} />
               {/* /izvestaji */}
             </Route>
           </Route>

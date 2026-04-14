@@ -7,7 +7,7 @@ import SearchBar from "@/components/SearchBar"
 import PartneriCard from "@/components/PartneriCard";
 import usePartneri from "@/hooks/usePartneri";
 import Modal from "@/components/Modal";
-import PartnerForm from "@/components/forms/PartnerForm";
+import PartnerForm, { type PartnerFormErrors } from "@/components/forms/PartnerForm";
 
 const PartneriPage = () => {
     const { partneri, isLoading, error, refetch } = usePartneri()
@@ -15,15 +15,48 @@ const PartneriPage = () => {
     const [selectedTip, setSelectedTip] = useState('');
     const [isAddOpen, setIsAddOpen] = useState(false)
     const [isSubmitting, setIsSubmitting] = useState(false)
+    const [partnerErrors, setPartnerErrors] = useState<PartnerFormErrors>({})
+
+    const getFirstErrorMessage = (value: unknown): string | undefined => {
+        if (Array.isArray(value)) {
+            const first = value[0]
+            return typeof first === 'string' ? first : undefined
+        }
+        return typeof value === 'string' ? value : undefined
+    }
+
+    const parsePartnerErrors = (err: any): PartnerFormErrors => {
+        const data = err?.response?.data
+        if (!data || typeof data !== 'object') {
+            return { form: 'Greška pri dodavanju partnera' }
+        }
+
+        const fieldErrors: PartnerFormErrors = {
+            naziv: getFirstErrorMessage(data.naziv),
+            pib: getFirstErrorMessage(data.pib),
+            email: getFirstErrorMessage(data.email),
+            adresa: getFirstErrorMessage(data.adresa),
+            telefon: getFirstErrorMessage(data.telefon),
+            tip: getFirstErrorMessage(data.tip),
+            form: getFirstErrorMessage(data.detail) || getFirstErrorMessage(data.non_field_errors),
+        }
+
+        if (!fieldErrors.naziv && !fieldErrors.pib && !fieldErrors.email && !fieldErrors.adresa && !fieldErrors.telefon && !fieldErrors.tip && !fieldErrors.form) {
+            fieldErrors.form = 'Greška pri dodavanju partnera'
+        }
+
+        return fieldErrors
+    }
 
     const handleAdd = async (data: { naziv: string, pib: string, email: string, adresa: string, telefon: string, tip: 'D' | 'K' }) => {
         setIsSubmitting(true)
+        setPartnerErrors({})
         try {
             await createPartner(data)
             setIsAddOpen(false)
             refetch()
-        } catch {
-            alert('Greška pri dodavanju partnera')
+        } catch (err: any) {
+            setPartnerErrors(parsePartnerErrors(err))
         } finally {
             setIsSubmitting(false)
         }
@@ -63,11 +96,22 @@ const PartneriPage = () => {
                 ))}
             </div>
 
-            <Modal isOpen={isAddOpen} title="Novi partner" onClose={() => setIsAddOpen(false)}>
+            <Modal
+                isOpen={isAddOpen}
+                title="Novi partner"
+                onClose={() => {
+                    setPartnerErrors({})
+                    setIsAddOpen(false)
+                }}
+            >
                 <PartnerForm 
                     onSubmit={handleAdd}
-                    onCancel={() => setIsAddOpen(false)}
+                    onCancel={() => {
+                        setPartnerErrors({})
+                        setIsAddOpen(false)
+                    }}
                     isLoading={isSubmitting}
+                    errors={partnerErrors}
                 />
             </Modal>
         </section>

@@ -10,6 +10,7 @@ urlpatterns = [
     path('api/partners/', include('partners.urls')),
     path('api/transport/', include('transport.urls')),
     path('api/documentss/', include('documentss.urls')),
+    path('api/reports/', include('reports.urls')),
 
     # JWT Token
     path('api/token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),

@@ -9,7 +9,7 @@ export const getSlot = (id: number) => {
     return api.get<Slot>(`/warehouse/slotovi/${id}/`);
 }
 
-export const createSlot = (data: { naziv: string, sektor: number }) => {
+export const createSlot = (data: { naziv: string, sektor: number, kapacitet: number }) => {
     return api.post<Slot>(`/warehouse/slotovi/`, data);
 }
 

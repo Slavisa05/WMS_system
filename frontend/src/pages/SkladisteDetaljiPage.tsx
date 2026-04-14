@@ -11,8 +11,8 @@ import useSektore from '@/hooks/useSektore';
 import useSlotovi from '@/hooks/useSlotovi';
 import Modal from '@/components/Modal';
 import ConfirmModal from '@/components/ConfirmModal';
-import SkladisteForm from '@/components/forms/SkladisteForm';
-import SektorForm from '@/components/forms/SektorForm';
+import SkladisteForm, { type SkladisteFormErrors } from '@/components/forms/SkladisteForm';
+import SektorForm, { type SektorFormErrors } from '@/components/forms/SektorForm';
 
 const SkladisteDetaljiPage = () => {
     const { id } = useParams();
@@ -24,16 +24,47 @@ const SkladisteDetaljiPage = () => {
     const [isEditOpen, setIsEditOpen] = useState(false)
     const [isDeleteOpen, setIsDeleteOpen] = useState(false)
     const [isSubmitting, setIsSubmitting] = useState(false)
+    const [skladisteErrors, setSkladisteErrors] = useState<SkladisteFormErrors>({})
 
-    const handleEdit = async (data: { naziv: string }) => {
+    const getFirstErrorMessage = (value: unknown): string | undefined => {
+        if (Array.isArray(value)) {
+            const first = value[0]
+            return typeof first === 'string' ? first : undefined
+        }
+        return typeof value === 'string' ? value : undefined
+    }
+
+    const parseSkladisteErrors = (err: any): SkladisteFormErrors => {
+        const data = err?.response?.data
+        if (!data || typeof data !== 'object') {
+            return { form: 'Greška pri izmeni skladišta' }
+        }
+
+        const fieldErrors: SkladisteFormErrors = {
+            naziv: getFirstErrorMessage(data.naziv),
+            adresa: getFirstErrorMessage(data.adresa),
+            telefon: getFirstErrorMessage(data.telefon),
+            tip: getFirstErrorMessage(data.tip),
+            form: getFirstErrorMessage(data.detail) || getFirstErrorMessage(data.non_field_errors),
+        }
+
+        if (!fieldErrors.naziv && !fieldErrors.adresa && !fieldErrors.telefon && !fieldErrors.tip && !fieldErrors.form) {
+            fieldErrors.form = 'Greška pri izmeni skladišta'
+        }
+
+        return fieldErrors
+    }
+
+    const handleEdit = async (data: { naziv: string, adresa: string, telefon: string, tip: 'DIST' | 'VELE' | 'MALO' | 'TRAN' }) => {
         if (!skladiste) return
         setIsSubmitting(true)
+        setSkladisteErrors({})
         try {
             await updateSkladiste(skladiste.id, data)
             setIsEditOpen(false)
             refetch()
-        } catch {
-            alert('Greška pri izmeni partnera')
+        } catch (err: any) {
+            setSkladisteErrors(parseSkladisteErrors(err))
         } finally {
             setIsSubmitting(false)
         }
@@ -55,15 +86,43 @@ const SkladisteDetaljiPage = () => {
     // DODAVANJE SEKTORA
     const [isAddSektorOpen, setIsAddSektorOpen] = useState(false)
     const [isSubmittingSektor, setIsSubmittingSektor] = useState(false)
+    const [sektorErrors, setSektorErrors] = useState<SektorFormErrors>({})
+
+    const getFirstErrorMessageSektor = (value: unknown): string | undefined => {
+        if (Array.isArray(value)) {
+            const first = value[0]
+            return typeof first === 'string' ? first : undefined
+        }
+        return typeof value === 'string' ? value : undefined
+    }
+
+    const parseSektorErrorsAdd = (err: any): SektorFormErrors => {
+        const data = err?.response?.data
+        if (!data || typeof data !== 'object') {
+            return { form: 'Greška pri dodavanju sektora' }
+        }
+
+        const fieldErrors: SektorFormErrors = {
+            naziv: getFirstErrorMessageSektor(data.naziv),
+            form: getFirstErrorMessageSektor(data.detail) || getFirstErrorMessageSektor(data.non_field_errors),
+        }
+
+        if (!fieldErrors.naziv && !fieldErrors.form) {
+            fieldErrors.form = 'Greška pri dodavanju sektora'
+        }
+
+        return fieldErrors
+    }
 
     const handleAdd = async (data: { naziv: string }) => {
         setIsSubmittingSektor(true)
+        setSektorErrors({})
         try {
             await createSektor({ ...data, skladiste: skladiste!.id })
             setIsAddSektorOpen(false)
             refetchSektore()
-        } catch {
-            alert('Greška pri dodavanju sektora')
+        } catch (err: any) {
+            setSektorErrors(parseSektorErrorsAdd(err))
         } finally {
             setIsSubmittingSektor(false)
         }
@@ -132,12 +191,23 @@ const SkladisteDetaljiPage = () => {
                 </div>
             </div>
 
-            <Modal isOpen={isEditOpen} title="Izmeni skladiste" onClose={() => setIsEditOpen(false)}>
+            <Modal
+                isOpen={isEditOpen}
+                title="Izmeni skladiste"
+                onClose={() => {
+                    setSkladisteErrors({})
+                    setIsEditOpen(false)
+                }}
+            >
                 <SkladisteForm
                     initialData={skladiste}
                     onSubmit={handleEdit}
-                    onCancel={() => setIsEditOpen(false)}
+                    onCancel={() => {
+                        setSkladisteErrors({})
+                        setIsEditOpen(false)
+                    }}
                     isLoading={isSubmitting}
+                    errors={skladisteErrors}
                 />
             </Modal>
 
@@ -151,11 +221,22 @@ const SkladisteDetaljiPage = () => {
                 isLoading={isSubmitting}
             />
 
-            <Modal isOpen={isAddSektorOpen} title="Dodaj sektor" onClose={() => setIsAddSektorOpen(false)}>
+            <Modal
+                isOpen={isAddSektorOpen}
+                title="Dodaj sektor"
+                onClose={() => {
+                    setSektorErrors({})
+                    setIsAddSektorOpen(false)
+                }}
+            >
                 <SektorForm 
                     onSubmit={handleAdd}
-                    onCancel={() => setIsAddSektorOpen(false)}
+                    onCancel={() => {
+                        setSektorErrors({})
+                        setIsAddSektorOpen(false)
+                    }}
                     isLoading={isSubmittingSektor}
+                    errors={sektorErrors}
                 />
             </Modal>
         </section>

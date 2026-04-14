@@ -10,8 +10,8 @@ import useSektor from "@/hooks/useSektor";
 import useSlotovi from "@/hooks/useSlotovi";
 import Modal from "@/components/Modal";
 import ConfirmModal from "@/components/ConfirmModal";
-import SektorForm from "@/components/forms/SektorForm";
-import SlotForm from "@/components/forms/SlotForm";
+import SektorForm, { type SektorFormErrors } from "@/components/forms/SektorForm";
+import SlotForm, { type SlotFormErrors } from "@/components/forms/SlotForm";
 
 const SektorPage = () => {
     const { id } = useParams();
@@ -22,16 +22,44 @@ const SektorPage = () => {
     const [isEditOpen, setIsEditOpen] = useState(false)
     const [isDeleteOpen, setIsDeleteOpen] = useState(false)
     const [isSubmitting, setIsSubmitting] = useState(false)
+    const [sektorErrors, setSektorErrors] = useState<SektorFormErrors>({})
+
+    const getFirstErrorMessage = (value: unknown): string | undefined => {
+        if (Array.isArray(value)) {
+            const first = value[0]
+            return typeof first === 'string' ? first : undefined
+        }
+        return typeof value === 'string' ? value : undefined
+    }
+
+    const parseSektorErrors = (err: any): SektorFormErrors => {
+        const data = err?.response?.data
+        if (!data || typeof data !== 'object') {
+            return { form: 'Greška pri izmeni sektora' }
+        }
+
+        const fieldErrors: SektorFormErrors = {
+            naziv: getFirstErrorMessage(data.naziv),
+            form: getFirstErrorMessage(data.detail) || getFirstErrorMessage(data.non_field_errors),
+        }
+
+        if (!fieldErrors.naziv && !fieldErrors.form) {
+            fieldErrors.form = 'Greška pri izmeni sektora'
+        }
+
+        return fieldErrors
+    }
 
     const handleEdit = async (data: { naziv: string }) => {
         if (!sektor) return
         setIsSubmitting(true)
+        setSektorErrors({})
         try {
             await updateSektor(sektor.id, data)
             setIsEditOpen(false)
             refetch()
-        } catch {
-            alert('Greška pri izmeni sektora')
+        } catch (err: any) {
+            setSektorErrors(parseSektorErrors(err))
         } finally {
             setIsSubmitting(false)
         }
@@ -53,15 +81,38 @@ const SektorPage = () => {
     // DODAVANJE SLOTA
     const [isAddSlotOpen, setIsAddSlotOpen] = useState(false)
     const [isSubmittingSlot, setIsSubmittingSlot] = useState(false)
+    const [slotErrors, setSlotErrors] = useState<SlotFormErrors>({})
+
+    const parseSlotErrors = (err: any): SlotFormErrors => {
+        const data = err?.response?.data
+        if (!data || typeof data !== 'object') {
+            return {
+                form: 'Greška pri dodavanju slota',
+            }
+        }
+
+        const fieldErrors: SlotFormErrors = {
+            naziv: getFirstErrorMessage(data.naziv),
+            kapacitet: getFirstErrorMessage(data.kapacitet),
+            form: getFirstErrorMessage(data.detail) || getFirstErrorMessage(data.non_field_errors),
+        }
+
+        if (!fieldErrors.naziv && !fieldErrors.kapacitet && !fieldErrors.form) {
+            fieldErrors.form = 'Greška pri dodavanju slota'
+        }
+
+        return fieldErrors
+    }
 
     const handleAdd = async (data: { naziv: string, kapacitet: number }) => {
         setIsSubmittingSlot(true)
+        setSlotErrors({})
         try {
             await createSlot({ ...data, sektor: sektor!.id })
             setIsAddSlotOpen(false)
             refetchSlotove()
-        } catch {
-            alert('Greška pri dodavanju sektora')
+        } catch (err: any) {
+            setSlotErrors(parseSlotErrors(err))
         } finally {
             setIsSubmittingSlot(false)
         }
@@ -116,7 +167,14 @@ const SektorPage = () => {
                 <div className="flex flex-wrap gap-8 items-center justify-between w-full">
                     <h2>Slotovi</h2> 
                     <div className="flex items-center gap-2 px-8 py-4 rounded-xl bg-sidebar">
-                        <Button icon={Plus} text='dodaj slot' onClick={() => setIsAddSlotOpen(true)} />
+                        <Button
+                            icon={Plus}
+                            text='dodaj slot'
+                            onClick={() => {
+                                setSlotErrors({})
+                                setIsAddSlotOpen(true)
+                            }}
+                        />
                     </div>
                 </div>
 
@@ -127,12 +185,23 @@ const SektorPage = () => {
                 </div>
             </div>
 
-            <Modal isOpen={isEditOpen} title="Izmeni sektor" onClose={() => setIsEditOpen(false)}>
+            <Modal
+                isOpen={isEditOpen}
+                title="Izmeni sektor"
+                onClose={() => {
+                    setSektorErrors({})
+                    setIsEditOpen(false)
+                }}
+            >
                 <SektorForm
                     initialData={sektor}
                     onSubmit={handleEdit}
-                    onCancel={() => setIsEditOpen(false)}
+                    onCancel={() => {
+                        setSektorErrors({})
+                        setIsEditOpen(false)
+                    }}
                     isLoading={isSubmitting}
+                    errors={sektorErrors}
                 />
             </Modal>
 
@@ -146,11 +215,22 @@ const SektorPage = () => {
                 isLoading={isSubmitting}
             />
 
-            <Modal isOpen={isAddSlotOpen} title="Dodaj slot" onClose={() => setIsAddSlotOpen(false)}>
+            <Modal
+                isOpen={isAddSlotOpen}
+                title="Dodaj slot"
+                onClose={() => {
+                    setSlotErrors({})
+                    setIsAddSlotOpen(false)
+                }}
+            >
                 <SlotForm 
                     onSubmit={handleAdd}
-                    onCancel={() => setIsAddSlotOpen(false)}
+                    onCancel={() => {
+                        setSlotErrors({})
+                        setIsAddSlotOpen(false)
+                    }}
                     isLoading={isSubmittingSlot}
+                    errors={slotErrors}
                 />
             </Modal>
         </section>

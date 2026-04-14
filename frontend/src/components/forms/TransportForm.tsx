@@ -1,9 +1,21 @@
 import { useState, useEffect } from "react"
+import DatePicker from "react-datepicker"
+import "react-datepicker/dist/react-datepicker.css"
 import type { Transport } from "@/types/transport"
 import useZaposlene from "@/hooks/useZaposlene"
 import useVozila from "@/hooks/useVozila"
 import Button from "../Button"
 import SearchableSelect from "@/components/SearchableSelect"
+
+export interface TransportFormErrors {
+    vozac?: string
+    vozilo?: string
+    datum_polaska?: string
+    datum_zavrsetka?: string
+    status?: string
+    napomena?: string
+    form?: string
+}
 
 interface TransportFormProps {
     onSubmit: (data: { 
@@ -17,35 +29,31 @@ interface TransportFormProps {
     onCancel: () => void
     initialData?: Transport | null
     isLoading?: boolean
+    errors?: TransportFormErrors
 }
 
-const TransportForm = ({ onSubmit, onCancel, initialData, isLoading }: TransportFormProps) => {
+const TransportForm = ({ onSubmit, onCancel, initialData, isLoading, errors }: TransportFormProps) => {
     const { zaposlene } = useZaposlene()
     const { vozila } = useVozila()
     const [vozacId, setVozacId] = useState<number | ''>('')
     const [voziloId, setVoziloId] = useState<number | ''>('')
-    const [datumPolaska, setDatumPolaska] = useState('')
-    const [datumZavrsetka, setDatumZavrsetka] = useState<string | null>(null)
+    const [datumPolaska, setDatumPolaska] = useState<Date | null>(null)
+    const [datumZavrsetka, setDatumZavrsetka] = useState<Date | null>(null)
     const [status, setStatus] = useState<'ZAKAZANO' | 'U_TOKU' | 'ZAVRSENO' | 'OTKAZANO' | 'NEUSPESNO'>('ZAKAZANO')
     const [napomena, setNapomena] = useState('')
-
-    const toDatetimeLocal = (val?: string | null) => {
-        if (!val) return ''
-        return val.slice(0, 16) // "YYYY-MM-DDTHH:MM"
-    }
 
     useEffect(() => {
         if (initialData) {
             setVozacId(initialData.vozac?.id ?? '')
             setVoziloId(initialData.vozilo?.id ?? '')
-            setDatumPolaska(toDatetimeLocal(initialData.datum_polaska))
-            setDatumZavrsetka(initialData.datum_zavrsetka ? toDatetimeLocal(initialData.datum_zavrsetka) : null)
+            setDatumPolaska(initialData.datum_polaska ? new Date(initialData.datum_polaska) : null)
+            setDatumZavrsetka(initialData.datum_zavrsetka ? new Date(initialData.datum_zavrsetka) : null)
             setStatus(initialData.status ?? 'ZAKAZANO')
             setNapomena(initialData.napomena ?? '')
         } else {
             setVozacId('')
             setVoziloId('')
-            setDatumPolaska('')
+            setDatumPolaska(null)
             setDatumZavrsetka(null)
             setStatus('ZAKAZANO')
             setNapomena('')
@@ -53,9 +61,14 @@ const TransportForm = ({ onSubmit, onCancel, initialData, isLoading }: Transport
     }, [initialData])
 
     const handleSubmit = () => {
-        if (vozacId === '' || voziloId === '') return
+        if (vozacId === '' || voziloId === '' || !datumPolaska) return
         onSubmit({
-            vozac: vozacId, vozilo: voziloId, datum_polaska: datumPolaska, datum_zavrsetka: datumZavrsetka, status, napomena
+            vozac: vozacId,
+            vozilo: voziloId,
+            datum_polaska: datumPolaska.toISOString(),
+            datum_zavrsetka: datumZavrsetka ? datumZavrsetka.toISOString() : null,
+            status,
+            napomena
         })
     }
 
@@ -70,6 +83,7 @@ const TransportForm = ({ onSubmit, onCancel, initialData, isLoading }: Transport
                         onChange={setVozacId}
                         placeholder="Pretraži vozače..."
                         required
+                        error={errors?.vozac}
                     />
                 </div>
 
@@ -81,28 +95,41 @@ const TransportForm = ({ onSubmit, onCancel, initialData, isLoading }: Transport
                         onChange={setVoziloId}
                         placeholder="Pretraži vozila..."
                         required
+                        error={errors?.vozilo}
                     />
                 </div>
 
                 <div className="flex flex-col gap-1">
                     <label className="text-sm text-sidebar-text">Datum polaska</label>
-                    <input
-                        type="datetime-local"
-                        value={datumPolaska}
-                        onChange={e => setDatumPolaska(e.target.value)}
+                    <DatePicker
+                        selected={datumPolaska}
+                        onChange={(date: Date | null) => setDatumPolaska(date)}
+                        showTimeSelect
+                        timeFormat="HH:mm"
+                        timeIntervals={15}
+                        dateFormat="dd.MM.yyyy HH:mm"
+                        placeholderText="Izaberi datum i vreme..."
                         required
-                        className="px-4 py-2 rounded-xl border border-border text-sm text-sidebar-text bg-sidebar focus:outline-none focus:border-primary"
+                        className="px-4 py-2 rounded-xl border border-border text-sm text-sidebar-text bg-sidebar focus:outline-none focus:border-primary w-full"
+                        wrapperClassName="w-full"
                     />
+                    {errors?.datum_polaska && <p className="text-xs text-red-500">{errors.datum_polaska}</p>}
                 </div>
 
                 <div className="flex flex-col gap-1">
                     <label className="text-sm text-sidebar-text">Datum završetka <span className="text-text-muted">(opciono)</span></label>
-                    <input
-                        type="datetime-local"
-                        value={datumZavrsetka ?? ''}
-                        onChange={e => setDatumZavrsetka(e.target.value || null)}
-                        className="px-4 py-2 rounded-xl border border-border text-sm text-sidebar-text bg-sidebar focus:outline-none focus:border-primary"
+                    <DatePicker
+                        selected={datumZavrsetka}
+                        onChange={(date: Date | null) => setDatumZavrsetka(date)}
+                        showTimeSelect
+                        timeFormat="HH:mm"
+                        timeIntervals={15}
+                        dateFormat="dd.MM.yyyy HH:mm"
+                        placeholderText="Izaberi datum i vreme..."
+                        className="px-4 py-2 rounded-xl border border-border text-sm text-sidebar-text bg-sidebar focus:outline-none focus:border-primary w-full"
+                        wrapperClassName="w-full"
                     />
+                    {errors?.datum_zavrsetka && <p className="text-xs text-red-500">{errors.datum_zavrsetka}</p>}
                 </div>
 
                 <div className="flex flex-col gap-1 col-span-2">
@@ -118,6 +145,7 @@ const TransportForm = ({ onSubmit, onCancel, initialData, isLoading }: Transport
                         <option className="bg-sidebar" value="OTKAZANO">Otkazano</option>
                         <option className="bg-sidebar" value="NEUSPESNO">Neuspešno</option>
                     </select>
+                    {errors?.status && <p className="text-xs text-red-500">{errors.status}</p>}
                 </div>
 
                 <div className="flex flex-col gap-1 col-span-2">
@@ -129,8 +157,15 @@ const TransportForm = ({ onSubmit, onCancel, initialData, isLoading }: Transport
                         rows={3}
                         className="px-4 py-2 rounded-xl border border-border text-sm text-sidebar-text bg-sidebar focus:outline-none focus:border-primary resize-none"
                     />
+                    {errors?.napomena && <p className="text-xs text-red-500">{errors.napomena}</p>}
                 </div>
             </div>
+
+            {errors?.form && (
+                <p className="text-sm text-red-500 bg-red-50 border border-red-200 rounded-lg px-3 py-2">
+                    {errors.form}
+                </p>
+            )}
 
             <div className="flex justify-end gap-2">
                 <Button text="Odustani" onClick={onCancel} variant="secondary" type="button" />

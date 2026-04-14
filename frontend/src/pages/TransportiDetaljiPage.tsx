@@ -9,7 +9,7 @@ import DocumentLogItem from "@/components/DocumentLogItem";
 import useTransport from "@/hooks/useTransport";
 import useDokumenta from "@/hooks/useDokumenta";
 import Modal from "@/components/Modal";
-import TransportForm from "@/components/forms/TransportForm";
+import TransportForm, { type TransportFormErrors } from "@/components/forms/TransportForm";
 
 const TransportiDetaljiPage = () => {
     const { id } = useParams();
@@ -18,16 +18,49 @@ const TransportiDetaljiPage = () => {
 
     const [isEditOpen, setIsEditOpen] = useState(false)
     const [isSubmitting, setIsSubmitting] = useState(false)
+    const [transportErrors, setTransportErrors] = useState<TransportFormErrors>({})
+
+    const getFirstErrorMessage = (value: unknown): string | undefined => {
+        if (Array.isArray(value)) {
+            const first = value[0]
+            return typeof first === 'string' ? first : undefined
+        }
+        return typeof value === 'string' ? value : undefined
+    }
+
+    const parseTransportErrors = (err: any): TransportFormErrors => {
+        const data = err?.response?.data
+        if (!data || typeof data !== 'object') {
+            return { form: 'Greška pri izmeni transporta' }
+        }
+
+        const fieldErrors: TransportFormErrors = {
+            vozac: getFirstErrorMessage(data.vozac),
+            vozilo: getFirstErrorMessage(data.vozilo),
+            datum_polaska: getFirstErrorMessage(data.datum_polaska),
+            datum_zavrsetka: getFirstErrorMessage(data.datum_zavrsetka),
+            status: getFirstErrorMessage(data.status),
+            napomena: getFirstErrorMessage(data.napomena),
+            form: getFirstErrorMessage(data.detail) || getFirstErrorMessage(data.non_field_errors),
+        }
+
+        if (!fieldErrors.vozac && !fieldErrors.vozilo && !fieldErrors.datum_polaska && !fieldErrors.datum_zavrsetka && !fieldErrors.status && !fieldErrors.napomena && !fieldErrors.form) {
+            fieldErrors.form = 'Greška pri izmeni transporta'
+        }
+
+        return fieldErrors
+    }
 
     const handleEdit = async (data: { vozac: number, vozilo: number, datum_polaska: string, datum_zavrsetka: string | null, status: 'ZAKAZANO' | 'U_TOKU' | 'ZAVRSENO' | 'OTKAZANO' | 'NEUSPESNO', napomena: string | null }) => {
         if (!transport) return
         setIsSubmitting(true)
+        setTransportErrors({})
         try {
             await updateTransport(transport.id, data)
             setIsEditOpen(false)
             refetch()
-        } catch {
-            alert('Greška pri izmeni transporta')
+        } catch (err: any) {
+            setTransportErrors(parseTransportErrors(err))
         } finally {
             setIsSubmitting(false)
         }
@@ -67,12 +100,23 @@ const TransportiDetaljiPage = () => {
                 </div>
             </div>
 
-            <Modal isOpen={isEditOpen} title="Izmeni transport" onClose={() => setIsEditOpen(false)}>
+            <Modal
+                isOpen={isEditOpen}
+                title="Izmeni transport"
+                onClose={() => {
+                    setTransportErrors({})
+                    setIsEditOpen(false)
+                }}
+            >
                 <TransportForm
                     initialData={transport}
                     onSubmit={handleEdit}
-                    onCancel={() => setIsEditOpen(false)}
+                    onCancel={() => {
+                        setTransportErrors({})
+                        setIsEditOpen(false)
+                    }}
                     isLoading={isSubmitting}
+                    errors={transportErrors}
                 />
             </Modal>
         </section>

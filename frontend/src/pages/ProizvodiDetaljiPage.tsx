@@ -9,7 +9,7 @@ import useProizvod from "@/hooks/useProizvod"
 import useZalihe from "@/hooks/useZalihe"
 import Modal from "@/components/Modal"
 import ConfirmModal from "@/components/ConfirmModal"
-import ProizvodForm from "@/components/forms/ProizvodForm"
+import ProizvodForm, { type ProizvodFormErrors } from "@/components/forms/ProizvodForm"
 
 const ProizvodiDetaljiPage = () => {
     const { id } = useParams();
@@ -20,16 +20,48 @@ const ProizvodiDetaljiPage = () => {
     const [isEditOpen, setIsEditOpen] = useState(false)
     const [isDeleteOpen, setIsDeleteOpen] = useState(false)
     const [isSubmitting, setIsSubmitting] = useState(false)
+    const [proizvodErrors, setProizvodErrors] = useState<ProizvodFormErrors>({})
+
+    const getFirstErrorMessage = (value: unknown): string | undefined => {
+        if (Array.isArray(value)) {
+            const first = value[0]
+            return typeof first === 'string' ? first : undefined
+        }
+        return typeof value === 'string' ? value : undefined
+    }
+
+    const parseProizvodErrors = (err: any): ProizvodFormErrors => {
+        const data = err?.response?.data
+        if (!data || typeof data !== 'object') {
+            return { form: 'Greška pri izmeni proizvoda' }
+        }
+
+        const fieldErrors: ProizvodFormErrors = {
+            naziv: getFirstErrorMessage(data.naziv),
+            barkod: getFirstErrorMessage(data.barkod),
+            sifra: getFirstErrorMessage(data.sifra),
+            jedinica_mere: getFirstErrorMessage(data.jedinica_mere),
+            kategorija: getFirstErrorMessage(data.kategorija),
+            form: getFirstErrorMessage(data.detail) || getFirstErrorMessage(data.non_field_errors),
+        }
+
+        if (!fieldErrors.naziv && !fieldErrors.barkod && !fieldErrors.sifra && !fieldErrors.jedinica_mere && !fieldErrors.kategorija && !fieldErrors.form) {
+            fieldErrors.form = 'Greška pri izmeni proizvoda'
+        }
+
+        return fieldErrors
+    }
 
     const handleEdit = async (data: { naziv: string, barkod: string, sifra: string, jedinica_mere: 'g' | 'kg' | 't' | 'ml' | 'l' | 'kol', kategorija: number }) => {
         if (!proizvod) return
         setIsSubmitting(true)
+            setProizvodErrors({})
         try {
             await updateProizvod(proizvod.id, data)
             setIsEditOpen(false)
             refetch()
-        } catch {
-            alert('Greška pri izmeni proizvoda')
+        } catch (err: any) {
+            setProizvodErrors(parseProizvodErrors(err))
         } finally {
             setIsSubmitting(false)
         }
@@ -94,12 +126,23 @@ const ProizvodiDetaljiPage = () => {
                 </div>
             </div>
 
-            <Modal isOpen={isEditOpen} title="Izmeni proizvod" onClose={() => setIsEditOpen(false)}>
+            <Modal
+                isOpen={isEditOpen}
+                title="Izmeni proizvod"
+                onClose={() => {
+                    setProizvodErrors({})
+                    setIsEditOpen(false)
+                }}
+            >
                 <ProizvodForm
                     initialData={proizvod}
                     onSubmit={handleEdit}
-                    onCancel={() => setIsEditOpen(false)}
+                    onCancel={() => {
+                        setProizvodErrors({})
+                        setIsEditOpen(false)
+                    }}
                     isLoading={isSubmitting}
+                                    errors={proizvodErrors}
                 />
             </Modal>
 

@@ -6,9 +6,20 @@ from warehouse.serializers import SlotReadSerializer
 
 class KategorijaSerializer(serializers.ModelSerializer):
     broj_proizvoda_ukupno = serializers.SerializerMethodField()
+    naziv = serializers.CharField(validators=[])
 
     def get_broj_proizvoda_ukupno(self, obj):
         return obj.proizvod_set.count()
+
+    def validate_naziv(self, value):
+        queryset = Kategorija.objects.filter(naziv__iexact=value)
+        if self.instance:
+            queryset = queryset.exclude(pk=self.instance.pk)
+
+        if queryset.exists():
+            raise serializers.ValidationError('Kategorija sa ovim nazivom vec postoji.')
+
+        return value
 
     class Meta:
         model = Kategorija
@@ -40,6 +51,40 @@ class ProizvodReadSerializer(serializers.ModelSerializer):
 
 
 class ProizvodWriteSerializer(serializers.ModelSerializer):
+    naziv = serializers.CharField(validators=[])
+    barkod = serializers.CharField(validators=[])
+    sifra = serializers.CharField(validators=[])
+
+    def validate_naziv(self, value):
+        queryset = Proizvod.objects.filter(naziv__iexact=value)
+        if self.instance:
+            queryset = queryset.exclude(pk=self.instance.pk)
+
+        if queryset.exists():
+            raise serializers.ValidationError('Proizvod sa ovim nazivom vec postoji.')
+
+        return value
+
+    def validate_barkod(self, value):
+        queryset = Proizvod.objects.filter(barkod__iexact=value)
+        if self.instance:
+            queryset = queryset.exclude(pk=self.instance.pk)
+
+        if queryset.exists():
+            raise serializers.ValidationError('Proizvod sa ovim barkodom vec postoji.')
+
+        return value
+
+    def validate_sifra(self, value):
+        queryset = Proizvod.objects.filter(sifra__iexact=value)
+        if self.instance:
+            queryset = queryset.exclude(pk=self.instance.pk)
+
+        if queryset.exists():
+            raise serializers.ValidationError('Proizvod sa ovom sifrom vec postoji.')
+
+        return value
+
     class Meta:
         model = Proizvod
         fields = '__all__'

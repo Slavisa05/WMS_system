@@ -25,6 +25,8 @@ class ZaposleniWriteSerializer(serializers.ModelSerializer):
     username = serializers.CharField(write_only=True)
     password1 = serializers.CharField(write_only=True)
     password2 = serializers.CharField(write_only=True)
+    jmbg = serializers.CharField(validators=[])
+    broj_telefona = serializers.CharField(validators=[])
 
     class Meta:
         model = Zaposleni
@@ -43,20 +45,48 @@ class ZaposleniWriteSerializer(serializers.ModelSerializer):
         if data.get('password1') or data.get('password2'):
             if data.get('password1') != data.get('password2'):
                 raise serializers.ValidationError('Lozinke se ne poklapaju')
-        
-        if data.get('username'):
-            if User.objects.filter(username=data['username']).exists():
-                raise serializers.ValidationError('Korisnik sa tim username-om već postoji')
-        
-        if data.get('ugovor_do') and data['ugovor_do'] <= data['datum_zaposlenja']:
+
+        datum_zaposlenja = data.get('datum_zaposlenja', self.instance.datum_zaposlenja if self.instance else None)
+        ugovor_do = data.get('ugovor_do', self.instance.ugovor_do if self.instance else None)
+        if ugovor_do and datum_zaposlenja and ugovor_do <= datum_zaposlenja:
             raise serializers.ValidationError('Datum ugovora ne može biti pre datuma zaposlenja')
         
         return data
 
+    def validate_jmbg(self, value):
+        queryset = Zaposleni.objects.filter(jmbg=value)
+        if self.instance:
+            queryset = queryset.exclude(pk=self.instance.pk)
+
+        if queryset.exists():
+            raise serializers.ValidationError('Zaposleni sa ovim JMBG-om vec postoji.')
+
+        return value
+
+    def validate_broj_telefona(self, value):
+        queryset = Zaposleni.objects.filter(broj_telefona=value)
+        if self.instance:
+            queryset = queryset.exclude(pk=self.instance.pk)
+
+        if queryset.exists():
+            raise serializers.ValidationError('Zaposleni sa ovim brojem telefona vec postoji.')
+
+        return value
+
+    def validate_username(self, value):
+        queryset = User.objects.filter(username__iexact=value)
+        if self.instance:
+            queryset = queryset.exclude(pk=self.instance.user_id)
+
+        if queryset.exists():
+            raise serializers.ValidationError('Korisnik sa tim korisnickim imenom vec postoji.')
+
+        return value
+
     def create(self, validated_data):
         username_object = validated_data.pop('username')
         password1_object = validated_data.pop('password1')
-        password2_object = validated_data.pop('password2')
+        validated_data.pop('password2')
 
         user = User.objects.create_user(username=username_object, password=password1_object)
 

@@ -28,6 +28,7 @@ class Proizvod(BaseModel):
     barkod = models.CharField(max_length=32, blank=False, null=False, unique=True)
     sifra = models.CharField(max_length=50, blank=False, null=False, unique=True, db_index=True)
     jedinica_mere = models.CharField(max_length=3, choices=JEDINICE_MERE, blank=False, null=False)
+    nabavna_cena = models.DecimalField(max_digits=10, decimal_places=2, blank=False, null=False)
     kategorija = models.ForeignKey(Kategorija, on_delete=models.PROTECT)
 
     class Meta:
@@ -44,8 +45,8 @@ class Proizvod(BaseModel):
     
 
 class Zalihe(BaseModel):
-    kolicina = models.DecimalField(max_digits=5, decimal_places=2, blank=False, null=False)
-    rezervisana_kolicina = models.DecimalField(max_digits=5, decimal_places=2, blank=False, null=False)
+    kolicina = models.DecimalField(max_digits=10, decimal_places=2, blank=False, null=False)
+    rezervisana_kolicina = models.DecimalField(max_digits=10, decimal_places=2, blank=False, null=False)
     proizvod = models.ForeignKey(Proizvod, blank=False, null=False, on_delete=models.PROTECT)
     slot = models.ForeignKey(Slot, blank=False, null=False, on_delete=models.PROTECT)
 

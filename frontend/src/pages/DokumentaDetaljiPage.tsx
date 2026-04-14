@@ -5,11 +5,32 @@ import Header from "@/components/Header";
 import Button from "@/components/Button";
 import StavkeDokumenta from "@/components/StavkeDokumenta";
 import useDokument from "@/hooks/useDokument";
+import { posaljiDokument, odobriDokument, odbijDokument } from "@/api/dokument";
+import { useAuth } from "@/context/AuthContext";
 
 const DokumentaDetaljiPage = () => {
     const { id } = useParams();
     const navigate = useNavigate();
-    const { dokument, isLoading, error } = useDokument(Number(id));
+    const { user, isMenadzer } = useAuth();
+    const { dokument, isLoading, error, refetch } = useDokument(Number(id));
+
+    const isKreator = dokument?.zaposleni.user === user?.id;
+    const mozeMenjati = isMenadzer || isKreator;
+
+    const handlePosalji = async () => {
+        await posaljiDokument(Number(id))
+        refetch()
+    }
+
+    const handleOdobri = async () => {
+        await odobriDokument(Number(id))
+        refetch()
+    }
+
+    const handleOdbij = async () => {
+        await odbijDokument(Number(id))
+        refetch()
+    }
 
     if (isLoading) return 'Loading...';
     if (error) return `Greska: ${error}`;    
@@ -22,7 +43,14 @@ const DokumentaDetaljiPage = () => {
                 <div className="flex flex-wrap gap-8 justify-between items-center w-full">
                     <h2>{dokument?.tip} #{dokument?.id}</h2>
                     <div className="flex items-center gap-2 py-4 px-8 rounded-xl bg-sidebar">
-                        <Button text='izmeni' onClick={() => navigate(`/dokumenta/${id}/uredi_dokument`)} />
+                        {dokument?.status === 'NACRT' && mozeMenjati && <>
+                            <Button text='izmeni' onClick={() => navigate(`/dokumenta/${id}/uredi_dokument`)} />
+                            <Button text="pošalji" variant="secondary" onClick={handlePosalji} />
+                        </>}
+                        {dokument?.status === 'NA_CEKANJU' && isMenadzer && <>
+                            <Button text="odobri" onClick={handleOdobri} />
+                            <Button text="odbij" variant="secondary" onClick={handleOdbij} />
+                        </>}
                     </div>
                 </div>
 

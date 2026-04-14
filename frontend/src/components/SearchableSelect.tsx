@@ -13,9 +13,10 @@ interface SearchableSelectProps {
     onChange: (id: number) => void
     placeholder?: string
     required?: boolean
+    error?: string
 }
 
-const SearchableSelect = ({ label, options, value, onChange, placeholder = 'Pretraži...', required }: SearchableSelectProps) => {
+const SearchableSelect = ({ label, options, value, onChange, placeholder = 'Pretraži...', required, error }: SearchableSelectProps) => {
     const [search, setSearch] = useState('')
     const [isOpen, setIsOpen] = useState(false)
     const containerRef = useRef<HTMLDivElement>(null)
@@ -111,6 +112,8 @@ const SearchableSelect = ({ label, options, value, onChange, placeholder = 'Pret
                     )}
                 </div>
             )}
+
+            {error && <p className="text-sm text-red-500 bg-red-50 border border-red-200 rounded-lg px-3 py-2">{error}</p>}
         </div>
     )
 }

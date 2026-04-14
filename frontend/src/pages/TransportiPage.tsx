@@ -7,7 +7,7 @@ import SearchBar from "@/components/SearchBar";
 import TransportLogItem from "@/components/TransportLogItem";
 import useTransporti from "@/hooks/useTransporti";
 import Modal from "@/components/Modal";
-import TransportForm from "@/components/forms/TransportForm";
+import TransportForm, { type TransportFormErrors } from "@/components/forms/TransportForm";
 
 const TransportiPage = () => {
     const { transporti ,isLoading, error, refetch } = useTransporti()
@@ -16,15 +16,48 @@ const TransportiPage = () => {
 
     const [isAddOpen, setIsAddOpen] = useState(false)
     const [isSubmitting, setIsSubmitting] = useState(false)
+    const [transportErrors, setTransportErrors] = useState<TransportFormErrors>({})
+
+    const getFirstErrorMessage = (value: unknown): string | undefined => {
+        if (Array.isArray(value)) {
+            const first = value[0]
+            return typeof first === 'string' ? first : undefined
+        }
+        return typeof value === 'string' ? value : undefined
+    }
+
+    const parseTransportErrors = (err: any): TransportFormErrors => {
+        const data = err?.response?.data
+        if (!data || typeof data !== 'object') {
+            return { form: 'Greška pri dodavanju transporta' }
+        }
+
+        const fieldErrors: TransportFormErrors = {
+            vozac: getFirstErrorMessage(data.vozac),
+            vozilo: getFirstErrorMessage(data.vozilo),
+            datum_polaska: getFirstErrorMessage(data.datum_polaska),
+            datum_zavrsetka: getFirstErrorMessage(data.datum_zavrsetka),
+            status: getFirstErrorMessage(data.status),
+            napomena: getFirstErrorMessage(data.napomena),
+            form: getFirstErrorMessage(data.detail) || getFirstErrorMessage(data.non_field_errors),
+        }
+
+        if (!fieldErrors.vozac && !fieldErrors.vozilo && !fieldErrors.datum_polaska && !fieldErrors.datum_zavrsetka && !fieldErrors.status && !fieldErrors.napomena && !fieldErrors.form) {
+            fieldErrors.form = 'Greška pri dodavanju transporta'
+        }
+
+        return fieldErrors
+    }
 
     const handleAdd = async (data: { vozac: number, vozilo: number, datum_polaska: string, datum_zavrsetka: string | null, status: 'ZAKAZANO' | 'U_TOKU' | 'ZAVRSENO' | 'OTKAZANO' | 'NEUSPESNO', napomena: string | null }) => {
         setIsSubmitting(true)
+        setTransportErrors({})
         try {
             await createTransport(data)
             setIsAddOpen(false)
             refetch()
-        } catch {
-            alert('Greška pri dodavanju transporta')
+        } catch (err: any) {
+            setTransportErrors(parseTransportErrors(err))
         } finally {
             setIsSubmitting(false)
         }
@@ -66,11 +99,22 @@ const TransportiPage = () => {
                 })}
             </div>
 
-            <Modal isOpen={isAddOpen} title="Dodaj transport" onClose={() => setIsAddOpen(false)}>
+            <Modal
+                isOpen={isAddOpen}
+                title="Dodaj transport"
+                onClose={() => {
+                    setTransportErrors({})
+                    setIsAddOpen(false)
+                }}
+            >
                 <TransportForm 
                     onSubmit={handleAdd}
-                    onCancel={() => setIsAddOpen(false)}
+                    onCancel={() => {
+                        setTransportErrors({})
+                        setIsAddOpen(false)
+                    }}
                     isLoading={isSubmitting}
+                    errors={transportErrors}
                 />
             </Modal>
         </section>

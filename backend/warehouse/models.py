@@ -1,6 +1,6 @@
 from django.db import models
 from core.models import BaseModel
-
+from django.core.exceptions import ValidationError
 
 class Skladiste(BaseModel):
     TIP_CHOICES = [
@@ -42,6 +42,12 @@ class Slot(BaseModel):
     class Meta:
         verbose_name_plural = "Slotovi"
         unique_together = ('naziv', 'sektor')
+
+    def clean(self):
+        super().clean()
+
+        if self.kapacitet <= 0:
+            raise ValidationError('Kapacitet mora biti u plusu!')
 
     def __str__(self):
         return self.naziv

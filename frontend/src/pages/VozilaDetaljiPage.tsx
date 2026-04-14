@@ -9,7 +9,7 @@ import useVozilo from "@/hooks/useVozilo";
 import useTransporti from "@/hooks/useTransporti";
 import Modal from "@/components/Modal";
 import ConfirmModal from "@/components/ConfirmModal";
-import VoziloForm from "@/components/forms/VoziloForm";
+import VoziloForm, { type VoziloFormErrors } from "@/components/forms/VoziloForm";
 
 const VozilaDetaljiPage = () => {
     const { id } = useParams()
@@ -20,16 +20,48 @@ const VozilaDetaljiPage = () => {
     const [isEditOpen, setIsEditOpen] = useState(false)
     const [isDeleteOpen, setIsDeleteOpen] = useState(false)
     const [isSubmitting, setIsSubmitting] = useState(false)
+    const [voziloErrors, setVoziloErrors] = useState<VoziloFormErrors>({})
+
+    const getFirstErrorMessage = (value: unknown): string | undefined => {
+        if (Array.isArray(value)) {
+            const first = value[0]
+            return typeof first === 'string' ? first : undefined
+        }
+        return typeof value === 'string' ? value : undefined
+    }
+
+    const parseVoziloErrors = (err: any): VoziloFormErrors => {
+        const data = err?.response?.data
+        if (!data || typeof data !== 'object') {
+            return { form: 'Greška pri izmeni vozila' }
+        }
+
+        const fieldErrors: VoziloFormErrors = {
+            model: getFirstErrorMessage(data.model),
+            registarski_broj: getFirstErrorMessage(data.registarski_broj),
+            datum_registracije: getFirstErrorMessage(data.datum_registracije),
+            poslednji_tehnicki: getFirstErrorMessage(data.poslednji_tehnicki),
+            zaduzeni_vozac: getFirstErrorMessage(data.zaduzeni_vozac),
+            form: getFirstErrorMessage(data.detail) || getFirstErrorMessage(data.non_field_errors),
+        }
+
+        if (!fieldErrors.model && !fieldErrors.registarski_broj && !fieldErrors.datum_registracije && !fieldErrors.poslednji_tehnicki && !fieldErrors.zaduzeni_vozac && !fieldErrors.form) {
+            fieldErrors.form = 'Greška pri izmeni vozila'
+        }
+
+        return fieldErrors
+    }
 
     const handleEdit = async (data: { model: string, registarski_broj: string, datum_registracije: string, poslednji_tehnicki: string, zaduzeni_vozac: number }) => {
         if (!vozilo) return
         setIsSubmitting(true)
+        setVoziloErrors({})
         try {
             await updateVozilo(vozilo.id, data)
             setIsEditOpen(false)
             refetch()
-        } catch {
-            alert('Greška pri izmeni vozila')
+        } catch (err: any) {
+            setVoziloErrors(parseVoziloErrors(err))
         } finally {
             setIsSubmitting(false)
         }
@@ -82,12 +114,23 @@ const VozilaDetaljiPage = () => {
                 </div>
             </div>
 
-            <Modal isOpen={isEditOpen} title="Izmeni vozilo" onClose={() => setIsEditOpen(false)}>
+            <Modal
+                isOpen={isEditOpen}
+                title="Izmeni vozilo"
+                onClose={() => {
+                    setVoziloErrors({})
+                    setIsEditOpen(false)
+                }}
+            >
                 <VoziloForm
                     initialData={vozilo}
                     onSubmit={handleEdit}
-                    onCancel={() => setIsEditOpen(false)}
+                    onCancel={() => {
+                        setVoziloErrors({})
+                        setIsEditOpen(false)
+                    }}
                     isLoading={isSubmitting}
+                    errors={voziloErrors}
                 />
             </Modal>
 

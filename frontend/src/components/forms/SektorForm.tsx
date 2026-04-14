@@ -3,14 +3,20 @@ import type { Sektor } from "@/types/skladiste"
 import Button from "../Button"
 import FormInput from "./FormInput"
 
+export interface SektorFormErrors {
+    naziv?: string
+    form?: string
+}
+
 interface SektorFormProps {
     onSubmit: (data: { naziv: string }) => void
     onCancel: () => void
     initialData?: Sektor | null
     isLoading?: boolean
+    errors?: SektorFormErrors
 }
 
-const SektorForm = ({ onSubmit, onCancel, initialData, isLoading }: SektorFormProps) => {
+const SektorForm = ({ onSubmit, onCancel, initialData, isLoading, errors }: SektorFormProps) => {
     const [naziv, setNaziv] = useState('')
 
     useEffect(() => {
@@ -27,8 +33,14 @@ const SektorForm = ({ onSubmit, onCancel, initialData, isLoading }: SektorFormPr
     }
 
     return (
-        <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-            <FormInput label="Naziv" value={naziv} onChange={setNaziv} placeholder="Naziv sektora" required />
+        <form onSubmit={handleSubmit} noValidate className="flex flex-col gap-4">
+            <FormInput label="Naziv" value={naziv} onChange={setNaziv} placeholder="Naziv sektora" required error={errors?.naziv} />
+
+            {errors?.form && (
+                <p className="text-sm text-red-500 bg-red-50 border border-red-200 rounded-lg px-3 py-2">
+                    {errors.form}
+                </p>
+            )}
 
             <div className="flex justify-end gap-2">
                 <Button text="Odustani" onClick={onCancel} variant="secondary" type="button" />

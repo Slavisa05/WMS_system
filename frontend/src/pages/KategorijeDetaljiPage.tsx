@@ -1,4 +1,3 @@
-import { Plus } from "lucide-react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useState } from "react";
 import { updateKategorija, deleteKategorija } from "@/api/kategorija";
@@ -9,7 +8,7 @@ import useKategorija from "@/hooks/useKategorija";
 import useProizvode from "@/hooks/useProizvode";
 import Modal from "@/components/Modal";
 import ConfirmModal from "@/components/ConfirmModal";
-import KategorijaForm from "@/components/forms/KategorijaForm";
+import KategorijaForm, { type KategorijaFormErrors } from "@/components/forms/KategorijaForm";
 
 const KategorijeDetaljiPage = () => {
     const { id } = useParams()
@@ -20,16 +19,44 @@ const KategorijeDetaljiPage = () => {
     const [isEditOpen, setIsEditOpen] = useState(false)
     const [isDeleteOpen, setIsDeleteOpen] = useState(false)
     const [isSubmitting, setIsSubmitting] = useState(false)
+    const [kategorijaErrors, setKategorijaErrors] = useState<KategorijaFormErrors>({})
+
+    const getFirstErrorMessage = (value: unknown): string | undefined => {
+        if (Array.isArray(value)) {
+            const first = value[0]
+            return typeof first === 'string' ? first : undefined
+        }
+        return typeof value === 'string' ? value : undefined
+    }
+
+    const parseKategorijaErrors = (err: any): KategorijaFormErrors => {
+        const data = err?.response?.data
+        if (!data || typeof data !== 'object') {
+            return { form: 'Greška pri izmeni kategorije' }
+        }
+
+        const fieldErrors: KategorijaFormErrors = {
+            naziv: getFirstErrorMessage(data.naziv),
+            form: getFirstErrorMessage(data.detail) || getFirstErrorMessage(data.non_field_errors),
+        }
+
+        if (!fieldErrors.naziv && !fieldErrors.form) {
+            fieldErrors.form = 'Greška pri izmeni kategorije'
+        }
+
+        return fieldErrors
+    }
 
     const handleEdit = async (data: { naziv: string }) => {
         if (!kategorija) return
         setIsSubmitting(true)
+            setKategorijaErrors({})
         try {
             await updateKategorija(kategorija.id, data)
             setIsEditOpen(false)
             refetch()
-        } catch {
-            alert('Greška pri izmeni kategorije')
+        } catch (err: any) {
+            setKategorijaErrors(parseKategorijaErrors(err))
         } finally {
             setIsSubmitting(false)
         }
@@ -66,12 +93,7 @@ const KategorijeDetaljiPage = () => {
             </div>
 
             <div className="flex flex-col gap-8">
-                <div className="flex flex-wrap gap-8 px-4 py-2 items-center justify-between w-full bg-sidebar text-sidebar-text rounded-xl">
-                    <h2>Proizvodi</h2> 
-                    <div className="flex items-center gap-2 px-8 py-4 rounded-xl bg-sidebar">
-                        <Button icon={Plus} text='dodaj proizvod' />
-                    </div>
-                </div>
+                <h2>Proizvodi</h2> 
 
                 <div className="flex flex-wrap gap-4">
                     {proizvodiKategorije.map(p => (
@@ -80,12 +102,23 @@ const KategorijeDetaljiPage = () => {
                 </div>
             </div>
 
-            <Modal isOpen={isEditOpen} title="Izmeni kategoriju" onClose={() => setIsEditOpen(false)}>
+            <Modal
+                isOpen={isEditOpen}
+                title="Izmeni kategoriju"
+                onClose={() => {
+                    setKategorijaErrors({})
+                    setIsEditOpen(false)
+                }}
+            >
                 <KategorijaForm
                     initialData={kategorija}
                     onSubmit={handleEdit}
-                    onCancel={() => setIsEditOpen(false)}
+                    onCancel={() => {
+                        setKategorijaErrors({})
+                        setIsEditOpen(false)
+                    }}
                     isLoading={isSubmitting}
+                                    errors={kategorijaErrors}
                 />
             </Modal>
 

@@ -7,22 +7,54 @@ import SearchBar from "@/components/SearchBar";
 import VoziloCard from "@/components/VoziloCard";
 import useVozila from "@/hooks/useVozila";
 import Modal from "@/components/Modal";
-import VoziloForm from "@/components/forms/VoziloForm";
+import VoziloForm, { type VoziloFormErrors } from "@/components/forms/VoziloForm";
 
 const VozilaPage = () => {
     const { vozila, isLoading, error, refetch } = useVozila()
     const [search, setSearch] = useState('')
     const [isAddOpen, setIsAddOpen] = useState(false)
     const [isSubmitting, setIsSubmitting] = useState(false)
+    const [voziloErrors, setVoziloErrors] = useState<VoziloFormErrors>({})
+
+    const getFirstErrorMessage = (value: unknown): string | undefined => {
+        if (Array.isArray(value)) {
+            const first = value[0]
+            return typeof first === 'string' ? first : undefined
+        }
+        return typeof value === 'string' ? value : undefined
+    }
+
+    const parseVoziloErrors = (err: any): VoziloFormErrors => {
+        const data = err?.response?.data
+        if (!data || typeof data !== 'object') {
+            return { form: 'Greška pri dodavanju vozila' }
+        }
+
+        const fieldErrors: VoziloFormErrors = {
+            model: getFirstErrorMessage(data.model),
+            registarski_broj: getFirstErrorMessage(data.registarski_broj),
+            datum_registracije: getFirstErrorMessage(data.datum_registracije),
+            poslednji_tehnicki: getFirstErrorMessage(data.poslednji_tehnicki),
+            zaduzeni_vozac: getFirstErrorMessage(data.zaduzeni_vozac),
+            form: getFirstErrorMessage(data.detail) || getFirstErrorMessage(data.non_field_errors),
+        }
+
+        if (!fieldErrors.model && !fieldErrors.registarski_broj && !fieldErrors.datum_registracije && !fieldErrors.poslednji_tehnicki && !fieldErrors.zaduzeni_vozac && !fieldErrors.form) {
+            fieldErrors.form = 'Greška pri dodavanju vozila'
+        }
+
+        return fieldErrors
+    }
 
     const handleAdd = async (data: { model: string, registarski_broj: string, datum_registracije: string, poslednji_tehnicki: string, zaduzeni_vozac: number }) => {
         setIsSubmitting(true)
+        setVoziloErrors({})
         try {
             await createVozilo(data)
             setIsAddOpen(false)
             refetch()
-        } catch {
-            alert('Greška pri dodavanju proizvoda')
+        } catch (err: any) {
+            setVoziloErrors(parseVoziloErrors(err))
         } finally {
             setIsSubmitting(false)
         }
@@ -58,11 +90,22 @@ const VozilaPage = () => {
                 })}
             </div>
 
-            <Modal isOpen={isAddOpen} title="Dodaj vozilo" onClose={() => setIsAddOpen(false)}>
+            <Modal
+                isOpen={isAddOpen}
+                title="Dodaj vozilo"
+                onClose={() => {
+                    setVoziloErrors({})
+                    setIsAddOpen(false)
+                }}
+            >
                 <VoziloForm 
                     onSubmit={handleAdd}
-                    onCancel={() => setIsAddOpen(false)}
+                    onCancel={() => {
+                        setVoziloErrors({})
+                        setIsAddOpen(false)
+                    }}
                     isLoading={isSubmitting}
+                    errors={voziloErrors}
                 />
             </Modal>
         </section>
