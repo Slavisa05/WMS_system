@@ -35,6 +35,7 @@ jobs:
             # Backend
             cd ../backend
             source venv/bin/activate
+            export DJANGO_ENV=production
             pip install -r requirements.txt --quiet
             python manage.py migrate --noinput
             python manage.py collectstatic --noinput
