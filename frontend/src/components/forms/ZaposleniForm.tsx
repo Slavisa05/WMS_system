@@ -12,6 +12,7 @@ export interface ZaposleniFormErrors {
     prezime?: string
     jmbg?: string
     broj_telefona?: string
+    datum_rodjenja?: string
     datum_zaposlenja?: string
     ugovor_do?: string
     pozicija?: string
@@ -27,6 +28,7 @@ interface ZaposleniFormProps {
         prezime: string,
         jmbg: string,
         broj_telefona: string,
+        datum_rodjenja: string,
         datum_zaposlenja: string,
         ugovor_do: string | null,
         pozicija: number,
@@ -46,6 +48,7 @@ const ZaposleniForm = ({ onSubmit, onCancel, initialData, isLoading, errors }: Z
     const [prezime, setPrezime] = useState('')
     const [jmbg, setJmbg] = useState('')
     const [brojTelefona, setBrojTelefona] = useState('')
+    const [datumRodjenja, setDatumRodjenja] = useState<Date | null>(null)
     const [datumZaposlenja, setDatumZaposlenja] = useState<Date | null>(null)
     const [ugovorDo, setUgovorDo] = useState<Date | null>(null)
     const [pozicijaId, setPozicijaId] = useState<number | ''>('')
@@ -59,6 +62,7 @@ const ZaposleniForm = ({ onSubmit, onCancel, initialData, isLoading, errors }: Z
             setPrezime(initialData.prezime)
             setJmbg(initialData.jmbg)
             setBrojTelefona(initialData.broj_telefona)
+            setDatumRodjenja(initialData.datum_rodjenja ? new Date(initialData.datum_rodjenja) : null)
             setDatumZaposlenja(initialData.datum_zaposlenja ? new Date(initialData.datum_zaposlenja) : null)
             setUgovorDo(initialData.ugovor_do ? new Date(initialData.ugovor_do) : null)
             setPozicijaId(initialData.pozicija?.id ?? '')
@@ -67,6 +71,7 @@ const ZaposleniForm = ({ onSubmit, onCancel, initialData, isLoading, errors }: Z
             setPrezime('')
             setJmbg('')
             setBrojTelefona('')
+            setDatumRodjenja(null)
             setDatumZaposlenja(null)
             setUgovorDo(null)
             setPozicijaId('')
@@ -78,10 +83,11 @@ const ZaposleniForm = ({ onSubmit, onCancel, initialData, isLoading, errors }: Z
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault()
-        if (pozicijaId === '' || !datumZaposlenja) return
+        if (pozicijaId === '' || !datumZaposlenja || !datumRodjenja) return
         onSubmit({
             ime, prezime, jmbg,
             broj_telefona: brojTelefona,
+            datum_rodjenja: datumRodjenja.toISOString().split('T')[0],
             datum_zaposlenja: datumZaposlenja.toISOString().split('T')[0],
             ugovor_do: ugovorDo ? ugovorDo.toISOString().split('T')[0] : null,
             pozicija: pozicijaId,
@@ -98,6 +104,20 @@ const ZaposleniForm = ({ onSubmit, onCancel, initialData, isLoading, errors }: Z
                 <FormInput label="Prezime" value={prezime} onChange={setPrezime} placeholder="Prezime" required error={errors?.prezime} />
                 <FormInput label="JMBG" value={jmbg} onChange={setJmbg} placeholder="JMBG" required error={errors?.jmbg} />
                 <FormInput label="Broj telefona" value={brojTelefona} onChange={setBrojTelefona} placeholder="+381..." required error={errors?.broj_telefona} />
+
+                <div className="flex flex-col gap-1">
+                    <label className="text-sm text-sidebar-text">Datum rodjenja</label>
+                    <DatePicker
+                        selected={datumRodjenja}
+                        onChange={(date: Date | null) => setDatumRodjenja(date)}
+                        dateFormat="dd.MM.yyyy"
+                        placeholderText="Izaberi datum..."
+                        required
+                        className="px-4 py-2 rounded-xl border border-border text-sm text-sidebar-text bg-sidebar focus:outline-none focus:border-primary w-full"
+                        wrapperClassName="w-full"
+                    />
+                    {errors?.datum_rodjenja && <p className="text-xs text-red-500">{errors.datum_rodjenja}</p>}
+                </div>
 
                 <div className="flex flex-col gap-1">
                     <label className="text-sm text-sidebar-text">Datum zaposlenja</label>

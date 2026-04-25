@@ -6,7 +6,7 @@ export const getSkladista = () => {
 }
 
 export const getSkladiste = (id: number) => {
-    return api.get<Skladiste>(`/warehouse/skladista/${id}`);
+    return api.get<Skladiste>(`/warehouse/skladista/${id}/`);
 }
 
 export const createSkladiste = (data: Partial<Skladiste>) => {

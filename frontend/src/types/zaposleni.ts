@@ -9,6 +9,7 @@ export interface Zaposleni {
     prezime: string
     jmbg: string
     broj_telefona: string
+    datum_rodjenja: string
     datum_zaposlenja: string
     ugovor_do: string | null
     pozicija: Pozicija | null

@@ -13,11 +13,11 @@ export const getZaposleni = (id: number) => {
     return api.get<Zaposleni>(`/accounts/zaposleni/${id}/`);
 }
 
-export const createZaposleni = (data: { ime: string, prezime: string, jmbg: string, broj_telefona: string, datum_zaposlenja: string, ugovor_do: string | null, pozicija: number }) => {
+export const createZaposleni = (data: { ime: string, prezime: string, jmbg: string, broj_telefona: string, datum_rodjenja: string, datum_zaposlenja: string, ugovor_do: string | null, pozicija: number }) => {
     return api.post<Zaposleni>(`/accounts/zaposleni/`, data);
 }
 
-export const updateZaposleni = (id: number, data: { ime: string, prezime: string, jmbg: string, broj_telefona: string, datum_zaposlenja: string, ugovor_do: string | null, pozicija: number }) => {
+export const updateZaposleni = (id: number, data: { ime: string, prezime: string, jmbg: string, broj_telefona: string, datum_rodjenja: string, datum_zaposlenja: string, ugovor_do: string | null, pozicija: number }) => {
     return api.put<Zaposleni>(`/accounts/zaposleni/${id}/`, data);
 }
 

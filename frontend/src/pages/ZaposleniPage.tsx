@@ -36,6 +36,7 @@ const ZaposleniPage = () => {
             prezime: getFirstErrorMessage(data.prezime),
             jmbg: getFirstErrorMessage(data.jmbg),
             broj_telefona: getFirstErrorMessage(data.broj_telefona),
+            datum_rodjenja: getFirstErrorMessage(data.datum_rodjenja),
             datum_zaposlenja: getFirstErrorMessage(data.datum_zaposlenja),
             ugovor_do: getFirstErrorMessage(data.ugovor_do),
             pozicija: getFirstErrorMessage(data.pozicija),
@@ -45,14 +46,14 @@ const ZaposleniPage = () => {
             form: getFirstErrorMessage(data.detail) || getFirstErrorMessage(data.non_field_errors),
         }
 
-        if (!fieldErrors.ime && !fieldErrors.prezime && !fieldErrors.jmbg && !fieldErrors.broj_telefona && !fieldErrors.datum_zaposlenja && !fieldErrors.ugovor_do && !fieldErrors.pozicija && !fieldErrors.username && !fieldErrors.password1 && !fieldErrors.password2 && !fieldErrors.form) {
+        if (!fieldErrors.ime && !fieldErrors.prezime && !fieldErrors.jmbg && !fieldErrors.broj_telefona && !fieldErrors.datum_rodjenja && !fieldErrors.datum_zaposlenja && !fieldErrors.ugovor_do && !fieldErrors.pozicija && !fieldErrors.username && !fieldErrors.password1 && !fieldErrors.password2 && !fieldErrors.form) {
             fieldErrors.form = 'Greška pri dodavanju zaposlenog'
         }
 
         return fieldErrors
     }
 
-    const handleAdd = async (data: { ime: string, prezime: string, jmbg: string, broj_telefona: string, datum_zaposlenja: string, ugovor_do: string | null, pozicija: number }) => {
+    const handleAdd = async (data: { ime: string, prezime: string, jmbg: string, broj_telefona: string, datum_rodjenja: string, datum_zaposlenja: string, ugovor_do: string | null, pozicija: number }) => {
         setIsSubmitting(true)
         setZaposleniErrors({})
         try {

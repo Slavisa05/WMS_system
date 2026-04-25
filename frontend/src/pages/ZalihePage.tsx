@@ -1,7 +1,5 @@
-import { Plus } from "lucide-react";
 import { useState } from "react";
 import Header from "@/components/Header";
-import Button from "@/components/Button";
 import ZaliheCard from "@/components/ZaliheCard";
 import SearchBar from "@/components/SearchBar";
 import useZalihe from "@/hooks/useZalihe";

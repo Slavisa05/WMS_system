@@ -44,20 +44,21 @@ const ZaposleniDetaljiPage = () => {
             prezime: getFirstErrorMessage(data.prezime),
             jmbg: getFirstErrorMessage(data.jmbg),
             broj_telefona: getFirstErrorMessage(data.broj_telefona),
+            datum_rodjenja: getFirstErrorMessage(data.datum_rodjenja),
             datum_zaposlenja: getFirstErrorMessage(data.datum_zaposlenja),
             ugovor_do: getFirstErrorMessage(data.ugovor_do),
             pozicija: getFirstErrorMessage(data.pozicija),
             form: getFirstErrorMessage(data.detail) || getFirstErrorMessage(data.non_field_errors),
         }
 
-        if (!fieldErrors.ime && !fieldErrors.prezime && !fieldErrors.jmbg && !fieldErrors.broj_telefona && !fieldErrors.datum_zaposlenja && !fieldErrors.ugovor_do && !fieldErrors.pozicija && !fieldErrors.form) {
+        if (!fieldErrors.ime && !fieldErrors.prezime && !fieldErrors.jmbg && !fieldErrors.broj_telefona && !fieldErrors.datum_rodjenja && !fieldErrors.datum_zaposlenja && !fieldErrors.ugovor_do && !fieldErrors.pozicija && !fieldErrors.form) {
             fieldErrors.form = 'Greška pri izmeni zaposlenog'
         }
 
         return fieldErrors
     }
 
-    const handleEdit = async (data: { ime: string, prezime: string, jmbg: string, broj_telefona: string, datum_zaposlenja: string, ugovor_do: string | null, pozicija: number }) => {
+    const handleEdit = async (data: { ime: string, prezime: string, jmbg: string, broj_telefona: string, datum_rodjenja: string, datum_zaposlenja: string, ugovor_do: string | null, pozicija: number }) => {
         if (!zaposleni) return
         setIsSubmitting(true)
         setZaposleniErrors({})
@@ -106,6 +107,7 @@ const ZaposleniDetaljiPage = () => {
 
                 <p className="flex items-center gap-2"><Hash size={16} className="text-text-muted shrink-0" />JMBG: {zaposleni?.jmbg}</p>
                 <p className="flex items-center gap-2"><Phone size={16} className="text-text-muted shrink-0" />Broj telefona: {zaposleni?.broj_telefona}</p>
+                <p className="flex items-center gap-2"><CalendarPlus size={16} className="text-text-muted shrink-0" />Datum rodjenja: {zaposleni?.datum_rodjenja}</p>
                 <p className="flex items-center gap-2"><CalendarPlus size={16} className="text-text-muted shrink-0" />Datum zaposlenja: {zaposleni?.datum_zaposlenja}</p>
                 <p className="flex items-center gap-2"><CalendarCheck size={16} className="text-text-muted shrink-0" />Ugovor do: {zaposleni?.ugovor_do ?? '/'}</p>
                 <p className="flex items-center gap-2"><Briefcase size={16} className="text-text-muted shrink-0" />Pozicija: {zaposleni?.pozicija?.naziv}</p>

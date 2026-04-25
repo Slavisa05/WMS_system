@@ -27,6 +27,9 @@ class ZaposleniWriteSerializer(serializers.ModelSerializer):
     password2 = serializers.CharField(write_only=True)
     jmbg = serializers.CharField(validators=[])
     broj_telefona = serializers.CharField(validators=[])
+    datum_rodjenja = serializers.DateField(input_formats=['%Y-%m-%d', '%d/%m/%Y', '%m/%d/%Y'])
+    datum_zaposlenja = serializers.DateField(input_formats=['%Y-%m-%d', '%d/%m/%Y', '%m/%d/%Y'])
+    ugovor_do = serializers.DateField(input_formats=['%Y-%m-%d', '%d/%m/%Y', '%m/%d/%Y'], required=False, allow_null=True)
 
     class Meta:
         model = Zaposleni
