@@ -24,6 +24,7 @@ jobs:
             cd /var/www/wms/WMS_system
 
             # Povuci izmjene
+            git checkout -- frontend/.env.production
             git pull origin main
 
             # Frontend build
