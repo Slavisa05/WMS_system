@@ -1,13 +1,19 @@
 import os
 from pathlib import Path
 from dotenv import load_dotenv
-from decouple import config
+from decouple import config, Config, RepositoryEnv
 
 load_dotenv()
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
+ENV = os.environ.get('DJANGO_ENV', 'development')
+
+if ENV == 'production':
+    config = Config(RepositoryEnv('.env.production'))
+else:
+    config = Config(RepositoryEnv('.env.development'))
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/6.0/howto/deployment/checklist/
