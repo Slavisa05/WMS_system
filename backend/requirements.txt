@@ -6,3 +6,4 @@ dotenv
 python-decouple
 django-filter
 psycopg2-binary
+gunicorn
