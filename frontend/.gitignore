@@ -25,6 +25,8 @@ venv/
 env/
 ENV/
 .env.*
+.env.production
+.env.developments
 
 # Database files
 *.sqlite3
