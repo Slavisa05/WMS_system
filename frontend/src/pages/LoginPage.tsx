@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { Eye, EyeOff } from 'lucide-react'
 import { useAuth } from '@/context/AuthContext'
 import Button from '@/components/Button'
+import logo from "/public/logo.png"
 
 const LoginPage = () => {
     const [username, setUsername] = useState('')
@@ -31,7 +32,7 @@ const LoginPage = () => {
     return (
         <div className="w-full h-screen flex items-center justify-center">
           <form onSubmit={handleSubmit} className="flex flex-col gap-8 w-[30vw] px-6 py-6 rounded-xl shadow-sm shadow-blue-200">
-                <img className="w-40 self-center" src="/logo.png" alt="Logo" />
+                <img className="w-40 self-center" src={logo} alt="Logo" />
                 <h1 className="self-center">Prijava</h1>
 
                 {error && (<p className="text-sm text-red-500 text-center">{error}</p>)}
