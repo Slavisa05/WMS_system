@@ -31,7 +31,7 @@ import IzvestajiPage from '@/pages/IzvestajiPage'
 
 const App = () => {
   return (
-    <BrowserRouter>
+    <BrowserRouter basename='/wms'>
       <AuthProvider>
         <Routes>
           <Route element={<PublicRoute />}>
