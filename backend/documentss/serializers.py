@@ -52,6 +52,7 @@ class DokumentReadSerializer(serializers.ModelSerializer):
     skladiste_izlaza = SkladisteSerializer()
     transport = TransportReadSerializer()
     stavke = StavkeDokumentaReadSerializer(many=True, read_only=True)
+    odobrio = ZaposleniReadSerializer(read_only=True)
 
     class Meta:
         model = Dokument
@@ -60,6 +61,8 @@ class DokumentReadSerializer(serializers.ModelSerializer):
 
 class DokumentWriteSerializer(serializers.ModelSerializer):
     stavke = StavkeDokumentaNestedSerializer(many=True)
+    odobrio = serializers.PrimaryKeyRelatedField(read_only=True)      # ← dodaj
+    datum_odluke = serializers.DateTimeField(read_only=True)
 
     class Meta:
         model = Dokument

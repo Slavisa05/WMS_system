@@ -1,3 +1,4 @@
+from django.utils import timezone
 from rest_framework import viewsets, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
@@ -63,6 +64,8 @@ class DokumentViewSet(SoftDeleteMixin, viewsets.ModelViewSet):
             )
 
         dokument.status = 'ODOBREN'
+        dokument.odobrio = request.user.zaposleni   
+        dokument.datum_odluke = timezone.now()
         dokument.save()
         
         return Response({'success': 'Dokument je uspešno odobren'}, status=status.HTTP_200_OK)
@@ -84,6 +87,8 @@ class DokumentViewSet(SoftDeleteMixin, viewsets.ModelViewSet):
             return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
         dokument.status = 'ODBIJEN'
+        dokument.odobrio = request.user.zaposleni   
+        dokument.datum_odluke = timezone.now()
         dokument.save()
         
         return Response({'success': 'Dokument je uspešno odbijen'}, status=status.HTTP_200_OK)

@@ -35,6 +35,8 @@ class Dokument(BaseModel):
     skladiste_izlaza = models.ForeignKey(Skladiste, blank=True, null=True, on_delete=models.PROTECT, related_name='dokumenti_izlaza')
     transport = models.ForeignKey(Transport, blank=True, null=True, on_delete=models.PROTECT)
     status = models.CharField(max_length=15, blank=False, null=False, choices=STATUS_CHOICES, default='NACRT')
+    odobrio = models.ForeignKey(Zaposleni, blank=True, null=True, on_delete=models.PROTECT, related_name='odobreni_dokumenti')
+    datum_odluke = models.DateTimeField(blank=True, null=True)
 
     class Meta:
         verbose_name_plural = "Dokumenti"

@@ -17,8 +17,10 @@ export interface Dokument {
     id: number
     tip: 'PRIJEMNICA' | 'POVRATNICA_K' | 'OTPREMNICA' | 'POVRATNICA_D' | 'MEDJUSKLADISNICA' | 'PRENOS' | 'INVENTAR' | 'OTPIS'
     datum_vreme: string
+    datum_odluke: string | null
     poslovni_partner: PoslovniPartner | null
     zaposleni: Zaposleni
+    odobrio: Zaposleni | null
     skladiste_ulaza: Skladiste | null
     skladiste_izlaza: Skladiste | null
     transport: Transport | null
