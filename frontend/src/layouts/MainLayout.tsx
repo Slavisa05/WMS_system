@@ -23,6 +23,7 @@ type NavItem = {
     label: string;
     icon: React.ElementType;
     iconColor: string;
+    external?: boolean;  
     to?: string;
     children?: NavChild[];
     roles?: ('Admin' | 'Menadzer' | 'Zaposlen')[];
@@ -52,7 +53,7 @@ const NAV_ITEMS: NavItem[] = [
         { label: "Zaposleni", to: "/zaposleni" },
     ]},
     { key: "izvestaji", label: "Izveštaji", icon: LineChart, iconColor: "group-hover:text-lime-500", roles: ['Admin', 'Menadzer'], to: "/izvestaji" },
-    { key: "admin_panel", label: "Admin panel", icon: Settings, iconColor: "group-hover:text-violet-500", roles: ['Admin'], to: "/admin" },
+    { key: "admin_panel", label: "Admin panel", icon: Settings, iconColor: "group-hover:text-violet-500", roles: ['Admin'], to: "/wms/admin", external: true },
 ];
 
 const MainLayout = () => {
@@ -89,6 +90,23 @@ const MainLayout = () => {
 
                             if (!item.children) {
                                 const active = isActive(item.to!);
+
+                                if (item.external) {
+                                    return (
+                                        <li key={item.key}>
+                                            <a
+                                                href={item.to}
+                                                target="_blank"
+                                                rel="noopener noreferrer"
+                                                className={`${navLinkClass} w-full`}
+                                            >
+                                                <Icon className={`${iconClass} ${item.iconColor}`} size={18} aria-hidden="true" />
+                                                {item.label}
+                                            </a>
+                                        </li>
+                                    );
+                                }
+
                                 return (
                                     <li key={item.key}>
                                         <Link
