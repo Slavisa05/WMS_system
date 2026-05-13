@@ -52,7 +52,7 @@ const NAV_ITEMS: NavItem[] = [
         { label: "Zaposleni", to: "/zaposleni" },
     ]},
     { key: "izvestaji", label: "Izveštaji", icon: LineChart, iconColor: "group-hover:text-lime-500", roles: ['Admin', 'Menadzer'], to: "/izvestaji" },
-    { key: "podesavanja", label: "Podešavanja", icon: Settings, iconColor: "group-hover:text-violet-500", to: "/podesavanja" },
+    { key: "admin_panel", label: "Admin panel", icon: Settings, iconColor: "group-hover:text-violet-500", roles: ['Admin'], to: "/admin" },
 ];
 
 const MainLayout = () => {
