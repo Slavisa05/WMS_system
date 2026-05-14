@@ -40,7 +40,6 @@ Sistem podržava više korisničkih uloga i pruža administratorima i menadžeri
 | Vite | 7.3.1 | Build tool |
 | ExcelJS | 4.4.0 | Export u Excel |
 | Recharts | 3.8.1 | Grafikoni |
-| Radix UI | 1.4.3 | UI komponente |
 
 ### Backend
 | Tehnologija | Verzija | Namena |
