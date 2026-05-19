@@ -238,20 +238,26 @@ Dozvole se proveravaju na backendu putem DRF `permissions`.
 
 Aplikacija je deployovana na **Ubuntu VPS** serveru (slavisadev.com/wms/).
 
-### Backend (Gunicorn + Nginx)
-
-```bash
-pip install gunicorn
-gunicorn wms_backend.wsgi:application --bind 0.0.0.0:8000
-```
-
-Nginx reverse proxy prosleđuje zahteve ka Gunicornu. SSL se konfiguriše putem Let's Encrypt / Certbot.
-
 ### Frontend
 
 ```bash
+cd frontend
+npm ci
 npm run build
 ```
+
+### Backend (Gunicorn + Nginx)
+
+```bash
+cd ../backend
+source venv/bin/activate
+export DJANGO_ENV=production
+pip install -r requirements.txt --quiet
+python manage.py migrate --noinput
+python manage.py collectstatic --noinput
+```
+
+Nginx reverse proxy prosleđuje zahteve ka Gunicornu. SSL se konfiguriše putem Let's Encrypt / Certbot.
 
 `dist/` direktorijum se servira putem Nginxa.
 

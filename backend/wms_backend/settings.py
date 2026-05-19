@@ -84,7 +84,6 @@ TEMPLATES = [
 WSGI_APPLICATION = 'wms_backend.wsgi.application'
 
 # JWT Token i Filter 
-
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': [
         'rest_framework_simplejwt.authentication.JWTAuthentication',
